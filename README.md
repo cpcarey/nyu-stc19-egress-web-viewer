@@ -12,7 +12,7 @@ A viewer for 3D visualization of NYU-collected data on egress behavior from NYC 
 ## Running
 
  * `npm start`
- * Go to `http://localhost:1234/src
+ * Go to `http://localhost:1234/src`
 
 ## Modifying
 
