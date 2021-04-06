@@ -1,0 +1,26 @@
+{
+  "name": "nyu-stc19-egress-veiwer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "3D web viewer for NYU collected COVID-19 export health facility egress behavior",
+  "main": "./build/potree/potree.js",
+  "scripts": {
+    "start": "gulp watch"
+  },
+  "dependencies": {
+    "gulp-concat": "^2.6.1",
+    "gulp-connect": "^5.7.0",
+    "json5": "^2.1.3",
+    "rollup": "^1.31.1",
+    "through": "~2.3.4"
+  },
+  "author": "Chris Carey",
+  "contributors": [
+    "Chris Carey",
+    "José Romero"
+  ],
+  "license": "BSD-2-CLAUSE",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  }
+}
