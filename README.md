@@ -5,6 +5,7 @@ A viewer for 3D visualization of NYU-collected data on egress behavior from NYC 
 # Preparing
 
  * Add `data/` folder tracked outside of repo due to size
+ * `npm install`
 
 # Running
 
