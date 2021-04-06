@@ -2,15 +2,21 @@
 
 A viewer for 3D visualization of NYU-collected data on egress behavior from NYC COVID-19 exposed health facilities.
 
-# Preparing
+# Development
+
+## Preparing
 
  * Add `data/` folder tracked outside of repo due to size
  * `npm install`
 
-# Running
+## Running
 
  * `npm start`
  * Go to `http://localhost:1234/src
+
+## Modifying
+
+ * Modify `src/index.html` and `src/app.js`
 
 # Credits
 
