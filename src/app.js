@@ -1,15 +1,28 @@
-import * as THREE from "../libs/three.js/build/three.module.js";
-import {Line2} from "../libs/three.js/lines/Line2.js";
-import {LineGeometry} from "../libs/three.js/lines/LineGeometry.js";
-import {LineMaterial} from "../libs/three.js/lines/LineMaterial.js";
+import * as THREE from '../libs/three.js/build/three.module.js';
+import {Line2} from '../libs/three.js/lines/Line2.js';
+import {LineGeometry} from '../libs/three.js/lines/LineGeometry.js';
+import {LineMaterial} from '../libs/three.js/lines/LineMaterial.js';
 
+//import * as CSV from '../libs/csv.js/csv.js';
+
+// Constants for loading data.
 const CODE = '22242';
 const URL_CLOUD = `http://localhost:1234/data/${CODE}.las_converted/metadata.json`;
 
+// Constants for processing data.
+const CLIPPING_SPHERE_THRESHOLD = 50;
 const LAT_MIN = 40.8391;
 const LAT_MAX = 40.8322;
 const LON_MIN = -73.8618;
 const LON_MAX = -73.8527;
+
+// Custom offsets for the particular scene.
+const CAMERA_POSITION_OFFSET_X = -500;
+const CAMERA_POSITION_OFFSET_Y = 500;
+const CAMERA_POSITION_Z = 800;
+const CAMERA_LOOK_AT_OFFSET_X = -100;
+const CAMERA_LOOK_AT_OFFSET_Y = 1000;
+const CAMERA_LOOK_AT_Z = 100;
 
 function run(linesInLatLon) {
   const viewer =
@@ -36,13 +49,6 @@ function run(linesInLatLon) {
     const mid = min.clone().add(max).divideScalar(2);
     const q1 = min.clone().add(mid).divideScalar(2);
 
-    // Custom offsets for the particular scene.
-    const CAMERA_POSITION_OFFSET_X = -500;
-    const CAMERA_POSITION_OFFSET_Y = 500;
-    const CAMERA_POSITION_Z = 800;
-    const CAMERA_LOOK_AT_OFFSET_X = -100;
-    const CAMERA_LOOK_AT_OFFSET_Y = 1000;
-    const CAMERA_LOOK_AT_Z = 100;
     const cameraPosition =
         new THREE.Vector3(
             q1.x + CAMERA_POSITION_OFFSET_X,
@@ -63,52 +69,209 @@ function run(linesInLatLon) {
         cameraLookAt.y,
         cameraLookAt.z);
 
-    const paths = linesInLatLon.map((lineInLatLon) => {
-      return lineInLatLon.map(([lon, lat]) => {
-        return [
-          ...latLonToCoordSpace(
-              min.x,
-              max.x,
-              min.y,
-              max.y,
-              LON_MIN,
-              LON_MAX,
-              LAT_MIN,
-              LAT_MAX,
-              parseFloat(lon),
-              parseFloat(lat),
-            ),
-          160,
-        ];
-      }).reduce((a, b) => [...a, ...b]);
-    });
+    for (const datum of linesInLatLon) {
+      datum.blob = convertLatLonToCoordSpace(datum.coords, min, max);
+      datum.center = getPolygonCenter(datum.blob);
+    }
 
-    const lineGeometries = paths.map((path) => {
-      const lineGeometry = new LineGeometry();
-      lineGeometry.setPositions(path);
-      return lineGeometry;
-    });
+    // Draw the bar chart if the URL contains the query param v=bar.
+    if (hasQueryParam('v', 'bar')) {
+      drawBarChart(viewer, centers);
+    } else if (hasQueryParam('v', 'path')) {
+      drawPathOutlines(viewer, blobs);
+    } else {
+      drawClippingSpheres(viewer, linesInLatLon);
+    }
 
-    const lineMaterial = new LineMaterial({
-      color: 0x00ff00,
-      dashSize: 5,
-      gapSize: 2,
-      linewidth: 6,
-      opacity: 0.8,
-      resolution: new THREE.Vector2(1000, 1000),
+    shadeEnvironment(e.pointcloud);
+  });
+};
+
+function convertLatLonToCoordSpace(coords, coordSpaceMin, coordSpaceMax) {
+  return coords.map(([lon, lat]) => {
+    return latLonToCoordSpace(
+      coordSpaceMin.x,
+      coordSpaceMax.x,
+      coordSpaceMin.y,
+      coordSpaceMax.y,
+      LON_MIN,
+      LON_MAX,
+      LAT_MIN,
+      LAT_MAX,
+      parseFloat(lon),
+      parseFloat(lat),
+    );
+  });
+}
+
+/**
+ * Draws a 3D bar chart visualization representing the number of overlaps at the
+ * given centers within a given radius threshold.
+ */
+function drawBarChart(viewer, centers, radius = 10) {
+  const overlapCounts = getCircleOverlapCounts(centers, radius);
+
+  // Create cylinders at center coordinates with heights representing overlaps.
+  const cylinders = centers.map((center, i) => {
+    const height = 20 * overlapCounts[i];
+    const cylinderGeometry =
+        new THREE.CylinderGeometry(radius, radius, radius * 2 + height, 16);
+    cylinderGeometry.rotateX(0.5 * Math.PI);
+    cylinderGeometry.translate(center[0], center[1], 160 + height / 2);
+    return cylinderGeometry;
+  });
+
+  const minColor = new THREE.Color(0.0, 1.0, 0.0);
+  const midColor = new THREE.Color(1.0, 1.0, 0.0);
+  const maxColor = new THREE.Color(1.0, 0.0, 0.0);
+
+  const maxCount = Math.max(...overlapCounts);
+  const normalizedCounts = overlapCounts.map((count) => count / maxCount);
+
+  for (const i in cylinders) {
+    const cylinder = cylinders[i];
+
+    let color = minColor.clone();
+    if (normalizedCounts[i] < 0.5) {
+      color = minColor.clone().lerp(midColor, normalizedCounts[i] * 2);
+    } else {
+      color = midColor.clone().lerp(maxColor, (normalizedCounts[i] - 0.5) * 2);
+    }
+
+    const cylinderMaterial = new THREE.MeshBasicMaterial({
+      color,
+      opacity: 0.5,
       transparent: true,
     });
 
-    viewer.addEventListener('update', () => {
-      viewer.renderer.getSize(lineMaterial.resolution);
-    });
+    const mesh = new THREE.Mesh(cylinder, cylinderMaterial);
+    viewer.scene.scene.add(mesh);
+  }
+}
 
-    for (const lineGeometry of lineGeometries) {
-      const line = new Line2(lineGeometry, lineMaterial);
-      viewer.scene.scene.add(line);
+function drawClippingSpheres(
+    viewer, data, radius=CLIPPING_SPHERE_THRESHOLD) {
+  for (const datum of data) {
+    const {center} = datum;
+    const volume = new Potree.SphereVolume();
+    if (datum.record) {
+      volume.category = datum.record[16];
     }
+    volume.scale.set(radius, radius, radius);
+    volume.position.set(center[0], center[1], 160);
+    volume.visible = false;
+    viewer.scene.addVolume(volume);
+  }
+}
+
+/**
+ * Returns an array of the number of circles with the given radius r overlap
+ * with a circle with radius r for each given circle center.
+ * Used for aggregation within Potree JS, i.e. rendering bar charts.
+ */
+function getCircleOverlapCounts(centers, radius = 10) {
+  // The maximum distance between the centers of two overlapping circles of
+  // equal radius r is 2r.
+  const threshold = radius * 2;
+  const thresholdSquared = threshold * threshold;
+
+  // Iterate through every center coordinate and 
+  return centers.map((center) => {
+    let count = 0;
+    for (const otherCenter of centers) {
+      if (otherCenter === center) {
+        continue;
+      }
+
+      const dx = (center[0] - otherCenter[0]);
+      const dy = (center[1] - otherCenter[1]);
+      const distanceSquared = dx * dx + dy * dy;
+      if (distanceSquared <= thresholdSquared) {
+        count++;
+      }
+    }
+    return count;
   });
-};
+}
+
+/**
+ * Returns an array of coordinates representing the array of bounding box
+ * centers of the given polygons.
+ * @param polygons Groups of coordinates in Potree coordinate space forming the
+ *     outlines of polygons
+ */
+function getPolygonCenter(polygon) {
+  // Extract bounding box of polygon.
+  const xCoords = polygon.map((coord) => coord[0]);
+  const yCoords = polygon.map((coord) => coord[1]);
+
+  const box = {
+    left: Math.min(...xCoords),
+    right: Math.max(...xCoords),
+    top: Math.min(...yCoords),
+    bottom: Math.max(...yCoords),
+  };
+
+  // Return center of polygon bounding box.
+  return [(box.left + box.right) / 2, (box.top + box.bottom) / 2];
+}
+
+function hasQueryParam(query, value) {
+  return Boolean(window.location.search.match(`${query}=${value}`));
+}
+
+/** Shades all points on gray color scale based on elevation. */
+function shadeEnvironment(pointCloud) {
+  const material = pointCloud.material;
+  material.activeAttributeName = "elevation";
+  material.gradient = [
+    [0.0, new THREE.Color(0.090, 0.090, 0.090)],
+    [0.1, new THREE.Color(0.180, 0.180, 0.180)],
+    [0.2, new THREE.Color(0.271, 0.271, 0.271)],
+    [0.3, new THREE.Color(0.365, 0.365, 0.365)],
+    [0.4, new THREE.Color(0.455, 0.455, 0.455)],
+    [0.5, new THREE.Color(0.545, 0.545, 0.545)],
+    [0.6, new THREE.Color(0.635, 0.635, 0.635)],
+    [0.7, new THREE.Color(0.729, 0.729, 0.729)],
+    [0.8, new THREE.Color(0.820, 0.820, 0.820)],
+    [0.9, new THREE.Color(0.910, 0.910, 0.910)],
+    [1.0, new THREE.Color(1.000, 1.000, 1.000)],
+  ];
+  material.elevationRange = [0, 400];
+}
+
+function drawPathOutlines(viewer, paths) {
+  const vectors = paths.map((path) => {
+    return path.map((coords) => {
+      return [...coords, 160];
+    }).reduce((a, b) => [...a, ...b]);
+  });
+
+  const lineGeometries = vectors.map((path) => {
+    const lineGeometry = new LineGeometry();
+    lineGeometry.setPositions(path);
+    return lineGeometry;
+  });
+
+  // Semi-transparent green outlines.
+  const lineMaterial = new LineMaterial({
+    color: 0x00ff00,
+    dashSize: 5,
+    gapSize: 2,
+    linewidth: 6,
+    opacity: 0.7,
+    resolution: new THREE.Vector2(1000, 1000),
+    transparent: true,
+  });
+
+  for (const lineGeometry of lineGeometries) {
+    const line = new Line2(lineGeometry, lineMaterial);
+    viewer.scene.scene.add(line);
+  }
+}
+
+function drawHeatmap(pointCloud) {
+}
 
 function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latMax, lon, lat) {
   const dx = xMax - xMin;
@@ -121,19 +284,53 @@ function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latM
   return [x, y];
 }
 
-function getLines() {
+let circlesData = null;
+let csvData = null;
+
+window.getLines = () => {
   const request = new XMLHttpRequest();
-  request.open('GET', 'http://localhost:1234/data/20200331CC_lines.json', true);
+  request.open('GET', 'http://localhost:1234/data/circles_20200330CH_ChrisJose.geojson', true);
+  //request.open('GET', 'http://localhost:1234/data/20200331CC_lines.json', true);
   request.onload = function() {
-    const parsed = `[${this.response.replace(/\r?\n|\r\t/g, '').replaceAll('}{', '},{')}]`;
-    const json = JSON.parse(parsed);
-    const lines = json.map((feature) => {
+    //const parsed = `[${this.response.replace(/\r?\n|\r\t/g, '').replaceAll('}{', '},{')}]`;
+    const json = JSON.parse(this.response);
+    const circles = json.features.map((feature) => {
       const coords = feature.geometry.coordinates[0];
-      return coords[0];
+      return {
+        feature,
+        coords: coords[0],
+      };
     });
-    run(lines);
+
+    for (const feature of json.features) {
+      feature.properties['Name'] = feature.properties['Name'].replace(/_auto/g, '');
+      feature.properties['Name'] = feature.properties['Name'].replace(/_merged/g, '');
+    }
+
+    circlesData = circles;
+    merge(circlesData, csvData);
   };
   request.send();
+
+  CSV.fetch({
+    url: 'http://localhost:1234/data/all_records_dta_09142020.csv',
+  }).done(function(dataset) {
+    csvData = dataset;
+    merge(circlesData, csvData);
+  });
+};
+
+function merge(circles, csv) {
+  if (circles === null || csv == null) {
+    return;
+  }
+
+  for (const circle of circles) {
+    const id = circle.feature.properties['Name'];
+    circle.record = csv.records.find((record) => record[1] === id);
+  }
+
+  run(circles);
 }
 
 document.addEventListener('DOMContentLoaded', getLines);
