@@ -1094,14 +1094,26 @@ export class Renderer {
 
         let numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
         let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
-        let numClipSpheres = (params.clipSpheres && params.clipSpheres.length) ? params.clipSpheres.length : 0;
+        let numClipSpheresSegment1 = 0;
+        let numClipSpheresSegment2 = 0;
+
+        if (params.clipSpheres) {
+          const clipSpheresSegment1 =
+              params.clipSpheres.filter((sphere) => sphere.category === 'Male');
+          const clipSpheresSegment2 =
+              params.clipSpheres.filter((sphere) => sphere.category === 'Female');
+          numClipSpheresSegment1 = clipSpheresSegment1.length;
+          numClipSpheresSegment2 = clipSpheresSegment2.length;
+        }
+
         let numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
 
         let defines = [
           `#define num_shadowmaps ${shadowMaps.length}`,
           `#define num_snapshots ${numSnapshots}`,
           `#define num_clipboxes ${numClipBoxes}`,
-          `#define num_clipspheres ${numClipSpheres}`,
+          `#define num_clipspheres_segment1 ${numClipSpheresSegment1}`,
+          `#define num_clipspheres_segment2 ${numClipSpheresSegment2}`,
           `#define num_clippolygons ${numClipPolygons}`,
         ];
 
@@ -1264,7 +1276,9 @@ export class Renderer {
 
         let clipSpheres = params.clipSpheres;
 
-        let matrices = [];
+        const matricesSegment1 = [];
+        const matricesSegment2 = [];
+
         for(let clipSphere of clipSpheres){
           //let mScale = new THREE.Matrix4().makeScale(...clipSphere.scale.toArray());
           //let mTranslate = new THREE.Matrix4().makeTranslation(...clipSphere.position.toArray());
@@ -1276,16 +1290,23 @@ export class Renderer {
 
           let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
 
-          matrices.push(viewToClip);
+          if (clipSphere.category === 'Male') {
+            matricesSegment1.push(viewToClip);
+          } else if (clipSphere.category === 'Female') {
+            matricesSegment2.push(viewToClip);
+          }
         }
 
-        let flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
+        let flattenedMatricesSegment1 =
+            [].concat(...matricesSegment1.map(matrix => matrix.elements));
+        let flattenedMatricesSegment2 =
+            [].concat(...matricesSegment2.map(matrix => matrix.elements));
 
-        const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
-        gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
-        
-        //const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
-        //gl.uniformMatrix4fv(lClipSpheres, false, material.uniforms.clipSpheres.value);
+        const lClipSpheresSegment1 = shader.uniformLocations['uClipSpheresSegment1[0]'];
+        gl.uniformMatrix4fv(lClipSpheresSegment1, false, flattenedMatricesSegment1);
+
+        const lClipSpheresSegment2 = shader.uniformLocations['uClipSpheresSegment2[0]'];
+        gl.uniformMatrix4fv(lClipSpheresSegment2, false, flattenedMatricesSegment2);
       }
 
 
