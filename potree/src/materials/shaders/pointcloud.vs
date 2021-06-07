@@ -62,7 +62,7 @@ uniform int clipMethod;
 
 
 uniform float size;
-fjkljuniform float minSize;
+uniform float minSize;
 uniform float maxSize;
 
 uniform float uPCIndex;
