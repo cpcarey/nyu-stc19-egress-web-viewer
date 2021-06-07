@@ -1,9 +1,19 @@
 const gulp = require('gulp');
+const chug = require('gulp-chug');
 const connect = require('gulp-connect');
 
-gulp.task('build', gulp.series(async function(done) {
+gulp.task('build-src', gulp.series(async function(done) {
   done();
 }));
+
+gulp.task('build-potree', async function(done) {
+  gulp.src('./potree/gulpfile.js')
+      .pipe(chug({
+        tasks: ['build', 'pack'],
+      }, function() {
+        done();
+      }));
+});
 
 gulp.task('webserver', gulp.series(async function() {
   server = connect.server({
@@ -12,9 +22,15 @@ gulp.task('webserver', gulp.series(async function() {
   });
 }));
 
-gulp.task('watch', gulp.parallel('build', 'webserver', async function() {
-  const watchlist = [
+gulp.task('watch', gulp.parallel('build-src', 'build-potree', 'webserver', async function() {
+  const watchlistSrc = [
+    './src/*',
   ];
 
-  gulp.watch(watchlist, gulp.series('build'));
+  const watchlistPotree = [
+    './potree/src/**/*',
+  ];
+
+  gulp.watch(watchlistSrc, gulp.series('build-src'));
+  gulp.watch(watchlistPotree, gulp.series('build-potree'));
 }));
