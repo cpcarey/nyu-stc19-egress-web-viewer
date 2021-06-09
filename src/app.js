@@ -3,7 +3,7 @@ import {Line2} from '../libs/three.js/lines/Line2.js';
 import {LineGeometry} from '../libs/three.js/lines/LineGeometry.js';
 import {LineMaterial} from '../libs/three.js/lines/LineMaterial.js';
 
-//import * as CSV from '../libs/csv.js/csv.js';
+import {DataStore} from './data_store.js';
 
 // Constants for loading data.
 const CODE = '22242';
@@ -24,7 +24,7 @@ const CAMERA_LOOK_AT_OFFSET_X = -100;
 const CAMERA_LOOK_AT_OFFSET_Y = 1000;
 const CAMERA_LOOK_AT_Z = 100;
 
-function run(linesInLatLon) {
+function render(geoJsonData) {
   const viewer =
       new Potree.Viewer(document.getElementById('potree_render_area'));
   viewer.setEDLEnabled(true);
@@ -69,7 +69,7 @@ function run(linesInLatLon) {
         cameraLookAt.y,
         cameraLookAt.z);
 
-    for (const datum of linesInLatLon) {
+    for (const datum of geoJsonData) {
       datum.blob = convertLatLonToCoordSpace(datum.coords, min, max);
       datum.center = getPolygonCenter(datum.blob);
     }
@@ -80,7 +80,7 @@ function run(linesInLatLon) {
     } else if (hasQueryParam('v', 'path')) {
       drawPathOutlines(viewer, blobs);
     } else {
-      drawClippingSpheres(viewer, linesInLatLon);
+      drawClippingSpheres(viewer, geoJsonData);
     }
 
     shadeEnvironment(e.pointcloud);
@@ -287,50 +287,11 @@ function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latM
 let circlesData = null;
 let csvData = null;
 
-window.getLines = () => {
-  const request = new XMLHttpRequest();
-  request.open('GET', 'http://localhost:1234/data/circles_20200330CH_ChrisJose.geojson', true);
-  //request.open('GET', 'http://localhost:1234/data/20200331CC_lines.json', true);
-  request.onload = function() {
-    //const parsed = `[${this.response.replace(/\r?\n|\r\t/g, '').replaceAll('}{', '},{')}]`;
-    const json = JSON.parse(this.response);
-    const circles = json.features.map((feature) => {
-      const coords = feature.geometry.coordinates[0];
-      return {
-        feature,
-        coords: coords[0],
-      };
-    });
 
-    for (const feature of json.features) {
-      feature.properties['Name'] = feature.properties['Name'].replace(/_auto/g, '');
-      feature.properties['Name'] = feature.properties['Name'].replace(/_merged/g, '');
-    }
-
-    circlesData = circles;
-    merge(circlesData, csvData);
-  };
-  request.send();
-
-  CSV.fetch({
-    url: 'http://localhost:1234/data/all_records_dta_09142020.csv',
-  }).done(function(dataset) {
-    csvData = dataset;
-    merge(circlesData, csvData);
-  });
-};
-
-function merge(circles, csv) {
-  if (circles === null || csv == null) {
-    return;
-  }
-
-  for (const circle of circles) {
-    const id = circle.feature.properties['Name'];
-    circle.record = csv.records.find((record) => record[1] === id);
-  }
-
-  run(circles);
+async function run() {
+  const dataStore = new DataStore();
+  const geoJsonData = await dataStore.getGeoJsonData();
+  render(geoJsonData);
 }
 
-document.addEventListener('DOMContentLoaded', getLines);
+document.addEventListener('DOMContentLoaded', run);
