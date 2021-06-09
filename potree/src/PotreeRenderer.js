@@ -540,9 +540,15 @@ class WebGLBuffer {
 
 };
 
+export class RendererConfig {
+  constructor() {
+    this.dimensions = [];
+  }
+}
+
 export class Renderer {
 
-  constructor(threeRenderer) {
+  constructor(threeRenderer, config) {
     this.threeRenderer = threeRenderer;
     this.gl = this.threeRenderer.getContext();
 
@@ -556,6 +562,7 @@ export class Renderer {
     this.glTypeMapping.set(Uint16Array, this.gl.UNSIGNED_SHORT);
 
     this.toggle = 0;
+    this.config = config || new RendererConfig();
   }
 
   deleteBuffer(geometry) {
@@ -1094,16 +1101,21 @@ export class Renderer {
 
         let numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
         let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
+        let numClipSpheres = 0;
         let numClipSpheresSegment1 = 0;
         let numClipSpheresSegment2 = 0;
 
         if (params.clipSpheres) {
-          const clipSpheresSegment1 =
-              params.clipSpheres.filter((sphere) => sphere.category === 'Male');
-          const clipSpheresSegment2 =
-              params.clipSpheres.filter((sphere) => sphere.category === 'Female');
-          numClipSpheresSegment1 = clipSpheresSegment1.length;
-          numClipSpheresSegment2 = clipSpheresSegment2.length;
+          numClipSpheres = params.clipSpheres.length;
+
+          if (this.config.dimensions.length) {
+            const clipSpheresSegment1 =
+                params.clipSpheres.filter((sphere) => sphere.category === 'Male');
+            const clipSpheresSegment2 =
+                params.clipSpheres.filter((sphere) => sphere.category === 'Female');
+            numClipSpheresSegment1 = clipSpheresSegment1.length;
+            numClipSpheresSegment2 = clipSpheresSegment2.length;
+          }
         }
 
         let numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
@@ -1112,6 +1124,7 @@ export class Renderer {
           `#define num_shadowmaps ${shadowMaps.length}`,
           `#define num_snapshots ${numSnapshots}`,
           `#define num_clipboxes ${numClipBoxes}`,
+          `#define num_clipspheres ${numClipSpheres}`,
           `#define num_clipspheres_segment1 ${numClipSpheresSegment1}`,
           `#define num_clipspheres_segment2 ${numClipSpheresSegment2}`,
           `#define num_clippolygons ${numClipPolygons}`,
@@ -1276,6 +1289,7 @@ export class Renderer {
 
         let clipSpheres = params.clipSpheres;
 
+        const matrices = [];
         const matricesSegment1 = [];
         const matricesSegment2 = [];
 
@@ -1290,23 +1304,35 @@ export class Renderer {
 
           let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
 
-          if (clipSphere.category === 'Male') {
-            matricesSegment1.push(viewToClip);
-          } else if (clipSphere.category === 'Female') {
-            matricesSegment2.push(viewToClip);
+          matrices.push(viewToClip);
+
+          if (this.config.dimensions.length) {
+            if (clipSphere.category === 'Male') {
+              matricesSegment1.push(viewToClip);
+            } else if (clipSphere.category === 'Female') {
+              matricesSegment2.push(viewToClip);
+            }
           }
         }
 
-        let flattenedMatricesSegment1 =
-            [].concat(...matricesSegment1.map(matrix => matrix.elements));
-        let flattenedMatricesSegment2 =
-            [].concat(...matricesSegment2.map(matrix => matrix.elements));
+        let flattenedMatrices =
+            [].concat(...matrices.map(matrix => matrix.elements));
 
-        const lClipSpheresSegment1 = shader.uniformLocations['uClipSpheresSegment1[0]'];
-        gl.uniformMatrix4fv(lClipSpheresSegment1, false, flattenedMatricesSegment1);
+        const lClipSpheres = shader.uniformLocations['uClipSpheres[0]'];
+        gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
 
-        const lClipSpheresSegment2 = shader.uniformLocations['uClipSpheresSegment2[0]'];
-        gl.uniformMatrix4fv(lClipSpheresSegment2, false, flattenedMatricesSegment2);
+        if (this.config.dimensions.length) {
+          let flattenedMatricesSegment1 =
+              [].concat(...matricesSegment1.map(matrix => matrix.elements));
+          let flattenedMatricesSegment2 =
+              [].concat(...matricesSegment2.map(matrix => matrix.elements));
+
+          const lClipSpheresSegment1 = shader.uniformLocations['uClipSpheresSegment1[0]'];
+          gl.uniformMatrix4fv(lClipSpheresSegment1, false, flattenedMatricesSegment1);
+
+          const lClipSpheresSegment2 = shader.uniformLocations['uClipSpheresSegment2[0]'];
+          gl.uniformMatrix4fv(lClipSpheresSegment2, false, flattenedMatricesSegment2);
+        }
       }
 
 

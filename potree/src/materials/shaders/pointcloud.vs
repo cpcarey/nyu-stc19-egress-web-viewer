@@ -49,6 +49,10 @@ uniform int clipMethod;
 #if defined(num_clipboxes) && num_clipboxes > 0
   uniform mat4 clipBoxes[num_clipboxes];
 #endif
+#
+#if defined(num_clipspheres) && num_clipspheres > 0
+  uniform mat4 uClipSpheres[num_clipspheres];
+#endif
 
 #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
   uniform mat4 uClipSpheresSegment1[num_clipspheres_segment1];
@@ -907,15 +911,25 @@ void main() {
   // CLIPPING
   doClipping();
 
-  #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0 && defined(num_clipspheres_segment2) && num_clipspheres_segment2 > 0
-    int num_clipspheres = num_clipspheres_segment1 + num_clipspheres_segment2;
-
+  #if defined(num_clipspheres) && num_clipspheres > 0
+    float wm = 0.0;
     float wmM = 0.0;
     float wmF = 0.0;
 
     float threshold = 0.75;
     float alpha = 0.1 * threshold * threshold;
 
+    for (int i = 0; i < num_clipspheres; i++) {
+      vec4 sphereLocal = uClipSpheres[i] * mvPosition;
+      float distance = length(sphereLocal.xyz);
+
+      if (distance < threshold) {
+        float w = distance;
+        wm += (threshold - w);
+      }
+    }
+
+    #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
     for (int i = 0; i < num_clipspheres_segment1; i++) {
       vec4 sphereLocal = uClipSpheresSegment1[i] * mvPosition;
       float distance = length(sphereLocal.xyz);
@@ -925,7 +939,9 @@ void main() {
         wmM += (threshold - w);
       }
     }
+    #endif
 
+    #if defined(num_clipspheres_segment2) && num_clipspheres_segment2 > 0
     for (int i = 0; i < num_clipspheres_segment2; i++) {
       vec4 sphereLocal = uClipSpheresSegment2[i] * mvPosition;
       float distance = length(sphereLocal.xyz);
@@ -935,7 +951,9 @@ void main() {
         wmF += (threshold - w);
       }
     }
+    #endif
 
+    wm /= float(num_clipspheres) * 0.5 * alpha;
     wmM /= float(num_clipspheres) * 0.5 * alpha;
     wmF /= float(num_clipspheres) * 0.5 * alpha;
 
@@ -971,6 +989,23 @@ void main() {
                           + invCGradientF.g * (1.0 - (pvColor.g * f)) * gfF,
           (pvColor.b * f) + invCGradientM.b * (1.0 - (pvColor.b * f)) * bfM
                           + invCGradientF.b * (1.0 - (pvColor.b * f)) * bfF);
+    } else if (wm > 0.0) {
+      vec3 cGradient = texture2D(gradient, vec2(1.0 - wm, wm)).rgb;
+
+      vec3 invCGradient = vec3(
+          max(min(1.0 - cGradient.r, 1.0), 0.0),
+          max(min(1.0 - cGradient.g, 1.0), 0.0),
+          max(min(1.0 - cGradient.b, 1.0), 0.0));
+
+      float hf = 5.0;
+      float rf = 1.0;
+      float gf = 0.5;
+      float bf = 0.0;
+
+      vColor = vec3(
+          (pvColor.r * f) + invCGradient.r * (1.0 - (pvColor.r * f)) * rf,
+          (pvColor.g * f) + invCGradient.g * (1.0 - (pvColor.g * f)) * gf,
+          (pvColor.b * f) + invCGradient.b * (1.0 - (pvColor.b * f)) * bf);
     } else {
       vColor = vec3(
           (pvColor.r * f),
