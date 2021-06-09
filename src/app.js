@@ -24,15 +24,22 @@ const CAMERA_LOOK_AT_OFFSET_X = -100;
 const CAMERA_LOOK_AT_OFFSET_Y = 1000;
 const CAMERA_LOOK_AT_Z = 100;
 
-function render(geoJsonData, rendererConfig) {
-  const viewer =
+/** The column index of the gender dimension in the DETER CSV data. */
+const DIMENSION_INDEX_GENDER = 16;
+
+let viewer;
+
+function init() {
+  viewer =
       new Potree.Viewer(
           document.getElementById('potree_render_area'),
           {rendererConfig});
   viewer.setEDLEnabled(true);
   viewer.setFOV(60);
   viewer.setPointBudget(2_000_000);
+}
 
+function render(geoJsonData, rendererConfig) {
   Potree.loadPointCloud(URL_CLOUD, CODE, (e) => {
     viewer.scene.addPointCloud(e.pointcloud);
     e.pointcloud.position.z = 0;
@@ -152,13 +159,15 @@ function drawBarChart(viewer, centers, radius = 10) {
 }
 
 function drawClippingSpheres(
-    viewer, data, radius=CLIPPING_SPHERE_THRESHOLD) {
+    viewer, data, dimensionIndex=null, radius=CLIPPING_SPHERE_THRESHOLD) {
   for (const datum of data) {
     const {center} = datum;
     const volume = new Potree.SphereVolume();
-    if (datum.record) {
-      volume.category = datum.record[16];
+
+    if (datum.record && dimensionIndex !== null) {
+      volume.category = datum.record[dimensionIndex];
     }
+
     volume.scale.set(radius, radius, radius);
     volume.position.set(center[0], center[1], 160);
     volume.visible = false;
@@ -285,41 +294,34 @@ function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latM
 
 let circlesData = null;
 let csvData = null;
-let rendererConfig = {dimension: null};
+let rendererConfig = {dimension: 'gender'};
 
 const dataStore = new DataStore();
 
 async function run() {
+  init();
   const geoJsonData = await dataStore.getGeoJsonData();
   render(geoJsonData, rendererConfig);
 }
 
-// TODO: This is not the correct to reset the GL context.
-function reset() {
-  const el = document.querySelector('#potree_render_area');
-  const {parentElement} = el;
-
-  const gl = el.querySelector('canvas').getContext('webgl');
-  gl.clear(gl.DEPTH_BUFFER_BIT);
-
-  parentElement.removeChild(el);
-  const newEl = document.createElement('div');
-  newEl.setAttribute('id', 'potree_render_area');
-  parentElement.appendChild(newEl);
+function reset(geoJsonData) {
+  while (viewer.scene.volumes.length) {
+    viewer.scene.removeVolume(viewer.scene.volumes[0]);
+  }
 }
 
 window.renderNoDimension = async () => {
   const geoJsonData = await dataStore.getGeoJsonData();
   rendererConfig.dimension = null;
-  reset();
-  render(geoJsonData, rendererConfig);
+  reset(geoJsonData);
+  drawClippingSpheres(viewer, geoJsonData);
 }
 
 window.renderGenderDimension = async () => {
   const geoJsonData = await dataStore.getGeoJsonData();
   rendererConfig.dimension = 'gender';
-  reset();
-  render(geoJsonData, rendererConfig);
+  reset(geoJsonData);
+  drawClippingSpheres(viewer, geoJsonData, DIMENSION_INDEX_GENDER);
 };
 
 document.addEventListener('DOMContentLoaded', run);
