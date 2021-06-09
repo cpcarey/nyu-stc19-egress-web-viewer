@@ -24,9 +24,11 @@ const CAMERA_LOOK_AT_OFFSET_X = -100;
 const CAMERA_LOOK_AT_OFFSET_Y = 1000;
 const CAMERA_LOOK_AT_Z = 100;
 
-function render(geoJsonData) {
+function render(geoJsonData, rendererConfig) {
   const viewer =
-      new Potree.Viewer(document.getElementById('potree_render_area'));
+      new Potree.Viewer(
+          document.getElementById('potree_render_area'),
+          {rendererConfig});
   viewer.setEDLEnabled(true);
   viewer.setFOV(60);
   viewer.setPointBudget(2_000_000);
@@ -270,9 +272,6 @@ function drawPathOutlines(viewer, paths) {
   }
 }
 
-function drawHeatmap(pointCloud) {
-}
-
 function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latMax, lon, lat) {
   const dx = xMax - xMin;
   const dy = yMax - yMin;
@@ -286,12 +285,41 @@ function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latM
 
 let circlesData = null;
 let csvData = null;
+let rendererConfig = {dimensions: []};
 
+const dataStore = new DataStore();
 
 async function run() {
-  const dataStore = new DataStore();
   const geoJsonData = await dataStore.getGeoJsonData();
-  render(geoJsonData);
+  render(geoJsonData, rendererConfig);
 }
+
+// TODO: This is not the correct to reset the GL context.
+function reset() {
+  const el = document.querySelector('#potree_render_area');
+  const {parentElement} = el;
+
+  const gl = el.querySelector('canvas').getContext('webgl');
+  gl.clear(gl.DEPTH_BUFFER_BIT);
+
+  parentElement.removeChild(el);
+  const newEl = document.createElement('div');
+  newEl.setAttribute('id', 'potree_render_area');
+  parentElement.appendChild(newEl);
+}
+
+window.renderNoDimensions = async () => {
+  const geoJsonData = await dataStore.getGeoJsonData();
+  rendererConfig.dimensions = [];
+  reset();
+  render(geoJsonData, rendererConfig);
+}
+
+window.renderGenderDimensions = async () => {
+  const geoJsonData = await dataStore.getGeoJsonData();
+  rendererConfig.dimensions = ['Male', 'Female'];
+  reset();
+  render(geoJsonData, rendererConfig);
+};
 
 document.addEventListener('DOMContentLoaded', run);

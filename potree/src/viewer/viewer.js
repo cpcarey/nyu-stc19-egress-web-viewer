@@ -46,6 +46,7 @@ export class Viewer extends EventDispatcher{
     this.guiLoadTasks = [];
 
     this.onVrListeners = [];
+    this.rendererConfig = args.rendererConfig;
 
     this.messages = [];
     this.elMessages = $(`
@@ -215,7 +216,7 @@ export class Viewer extends EventDispatcher{
       );
     }
     
-    this.pRenderer = new Renderer(this.renderer);
+    this.pRenderer = new Renderer(this.renderer, this.rendererConfig);
     
     {
       let near = 2.5;
@@ -378,6 +379,10 @@ export class Viewer extends EventDispatcher{
   // ------------------------------------------------------------------------------------
   // Viewer API
   // ------------------------------------------------------------------------------------
+
+  setRendererConfig(rendererConfig) {
+    this.rendererConfig = rendererConfig;
+  }
 
   setScene (scene) {
     if (scene === this.scene) {
