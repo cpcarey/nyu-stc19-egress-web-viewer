@@ -285,7 +285,7 @@ function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latM
 
 let circlesData = null;
 let csvData = null;
-let rendererConfig = {dimensions: []};
+let rendererConfig = {dimension: null};
 
 const dataStore = new DataStore();
 
@@ -308,16 +308,16 @@ function reset() {
   parentElement.appendChild(newEl);
 }
 
-window.renderNoDimensions = async () => {
+window.renderNoDimension = async () => {
   const geoJsonData = await dataStore.getGeoJsonData();
-  rendererConfig.dimensions = [];
+  rendererConfig.dimension = null;
   reset();
   render(geoJsonData, rendererConfig);
 }
 
-window.renderGenderDimensions = async () => {
+window.renderGenderDimension = async () => {
   const geoJsonData = await dataStore.getGeoJsonData();
-  rendererConfig.dimensions = ['Male', 'Female'];
+  rendererConfig.dimension = 'gender';
   reset();
   render(geoJsonData, rendererConfig);
 };

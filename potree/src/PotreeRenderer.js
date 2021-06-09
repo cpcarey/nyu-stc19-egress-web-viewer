@@ -542,7 +542,7 @@ class WebGLBuffer {
 
 export class RendererConfig {
   constructor() {
-    this.dimensions = [];
+    this.dimension = null;
   }
 }
 
@@ -1108,7 +1108,7 @@ export class Renderer {
         if (params.clipSpheres) {
           numClipSpheres = params.clipSpheres.length;
 
-          if (this.config.dimensions.length) {
+          if (this.config.dimension) {
             const clipSpheresSegment1 =
                 params.clipSpheres.filter((sphere) => sphere.category === 'Male');
             const clipSpheresSegment2 =
@@ -1306,7 +1306,7 @@ export class Renderer {
 
           matrices.push(viewToClip);
 
-          if (this.config.dimensions.length) {
+          if (this.config.dimension) {
             if (clipSphere.category === 'Male') {
               matricesSegment1.push(viewToClip);
             } else if (clipSphere.category === 'Female') {
@@ -1321,7 +1321,7 @@ export class Renderer {
         const lClipSpheres = shader.uniformLocations['uClipSpheres[0]'];
         gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
 
-        if (this.config.dimensions.length) {
+        if (this.config.dimension) {
           let flattenedMatricesSegment1 =
               [].concat(...matricesSegment1.map(matrix => matrix.elements));
           let flattenedMatricesSegment2 =
