@@ -32,14 +32,13 @@ let viewer;
 function init() {
   viewer =
       new Potree.Viewer(
-          document.getElementById('potree_render_area'),
-          {rendererConfig});
+          document.getElementById('potree_render_area'));
   viewer.setEDLEnabled(true);
   viewer.setFOV(60);
   viewer.setPointBudget(2_000_000);
 }
 
-function render(geoJsonData, rendererConfig) {
+function render(geoJsonData) {
   Potree.loadPointCloud(URL_CLOUD, CODE, (e) => {
     viewer.scene.addPointCloud(e.pointcloud);
     e.pointcloud.position.z = 0;
@@ -165,7 +164,12 @@ function drawClippingSpheres(
     const volume = new Potree.SphereVolume();
 
     if (datum.record && dimensionIndex !== null) {
-      volume.category = datum.record[dimensionIndex];
+      const dimensionValue = datum.record[dimensionIndex];
+      const dimensionValueMap = new Map([
+        ['Male', 0],
+        ['Female', 1],
+      ]);
+      volume.category = dimensionValueMap.get(dimensionValue);
     }
 
     volume.scale.set(radius, radius, radius);
@@ -294,14 +298,13 @@ function latLonToCoordSpace(xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latM
 
 let circlesData = null;
 let csvData = null;
-let rendererConfig = {dimension: 'gender'};
 
 const dataStore = new DataStore();
 
 async function run() {
   init();
   const geoJsonData = await dataStore.getGeoJsonData();
-  render(geoJsonData, rendererConfig);
+  render(geoJsonData);
 }
 
 function reset(geoJsonData) {
@@ -312,14 +315,12 @@ function reset(geoJsonData) {
 
 window.renderNoDimension = async () => {
   const geoJsonData = await dataStore.getGeoJsonData();
-  rendererConfig.dimension = null;
   reset(geoJsonData);
   drawClippingSpheres(viewer, geoJsonData);
 }
 
 window.renderGenderDimension = async () => {
   const geoJsonData = await dataStore.getGeoJsonData();
-  rendererConfig.dimension = 'gender';
   reset(geoJsonData);
   drawClippingSpheres(viewer, geoJsonData, DIMENSION_INDEX_GENDER);
 };
