@@ -542,7 +542,6 @@ class WebGLBuffer {
 
 export class RendererConfig {
   constructor() {
-    this.dimension = null;
   }
 }
 
@@ -1047,6 +1046,16 @@ export class Renderer {
     }
   }
 
+  getDimensionValueCount(clipSpheres) {
+    const categoryValueSet = new Set();
+    for (const sphere of clipSpheres) {
+      if (sphere.category !== null && sphere.category !== undefined) {
+        categoryValueSet.add(sphere.category);
+      }
+    }
+    return categoryValueSet.size;
+  }
+
   renderOctree(octree, nodes, camera, target, params = {}){
 
     let gl = this.gl;
@@ -1108,11 +1117,11 @@ export class Renderer {
         if (params.clipSpheres) {
           numClipSpheres = params.clipSpheres.length;
 
-          if (this.config.dimension) {
+          if (this.getDimensionValueCount(params.clipSpheres) === 2) {
             const clipSpheresSegment1 =
-                params.clipSpheres.filter((sphere) => sphere.category === 'Male');
+                params.clipSpheres.filter((sphere) => sphere.category === 0);
             const clipSpheresSegment2 =
-                params.clipSpheres.filter((sphere) => sphere.category === 'Female');
+                params.clipSpheres.filter((sphere) => sphere.category === 1);
             numClipSpheresSegment1 = clipSpheresSegment1.length;
             numClipSpheresSegment2 = clipSpheresSegment2.length;
           }
@@ -1306,12 +1315,10 @@ export class Renderer {
 
           matrices.push(viewToClip);
 
-          if (this.config.dimension) {
-            if (clipSphere.category === 'Male') {
-              matricesSegment1.push(viewToClip);
-            } else if (clipSphere.category === 'Female') {
-              matricesSegment2.push(viewToClip);
-            }
+          if (clipSphere.category === 0) {
+            matricesSegment1.push(viewToClip);
+          } else if (clipSphere.category === 1) {
+            matricesSegment2.push(viewToClip);
           }
         }
 
@@ -1321,7 +1328,7 @@ export class Renderer {
         const lClipSpheres = shader.uniformLocations['uClipSpheres[0]'];
         gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
 
-        if (this.config.dimension) {
+        if (matricesSegment1.length > 0 || matricesSegment2.length > 0) {
           let flattenedMatricesSegment1 =
               [].concat(...matricesSegment1.map(matrix => matrix.elements));
           let flattenedMatricesSegment2 =
