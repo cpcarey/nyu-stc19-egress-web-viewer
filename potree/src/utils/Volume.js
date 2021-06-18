@@ -102,6 +102,20 @@ export class Volume extends THREE.Object3D {
   }
 };
 
+export class PointVolume extends Volume {
+  constructor(args = {}) {
+    super(args);
+    this.constructor.counter =
+        (this.constructor.counter === undefined)
+            ? 0
+            : this.constructor.counter + 1;
+    this.name = 'point_' + this.constructor.counter;
+  }
+
+  getVolume() {
+    return 1.0;
+  }
+}
 
 export class BoxVolume extends Volume{
 
