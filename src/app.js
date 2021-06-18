@@ -176,7 +176,7 @@ function drawClippingSpheres(
     volume.position.set(center[0], center[1], 160);
     volume.visible = false;
 
-    viewer.scene.addVolume(volume);
+    viewer.scene.addHeatPoint(volume);
   }
 }
 

@@ -30,6 +30,7 @@ export class Scene extends EventDispatcher{
     this.measurements = [];
     this.profiles = [];
     this.volumes = [];
+    this.heatPoints = [];
     this.polygonClipVolumes = [];
     this.cameraAnimations = [];
     this.orientedImages = [];
@@ -130,6 +131,15 @@ export class Scene extends EventDispatcher{
     });
   }
 
+  addHeatPoint(volume) {
+    this.heatPoints.push(volume);
+    this.dispatchEvent({
+      'type': 'volume_added',
+      'scene': this,
+      'volume': volume
+    });
+  }
+
   addVolume (volume) {
     this.volumes.push(volume);
     this.dispatchEvent({
@@ -207,6 +217,19 @@ export class Scene extends EventDispatcher{
         'type': 'geopackage_removed',
         'scene': this,
         'geopackage': geopackage
+      });
+    }
+  };
+
+  removeHeatPoint(heatPoint) {
+    let index = this.heatPoints.indexOf(heatPoint);
+    if (index > -1) {
+      this.heatPoints.splice(index, 1);
+
+      this.dispatchEvent({
+        'type': 'volume_removed',
+        'scene': this,
+        'volume': heatPoint
       });
     }
   };
@@ -318,6 +341,10 @@ export class Scene extends EventDispatcher{
 
     while (this.profiles.length > 0) {
       this.removeProfile(this.profiles[0]);
+    }
+
+    while (this.heatPoints.length > 0) {
+      this.removeHeatPoint(this.volumes[0]);
     }
 
     while (this.volumes.length > 0) {

@@ -102,7 +102,7 @@ export class Volume extends THREE.Object3D {
   }
 };
 
-export class PointVolume extends Volume {
+export class PointVolume extends THREE.Object3D {
   constructor(args = {}) {
     super(args);
     this.constructor.counter =

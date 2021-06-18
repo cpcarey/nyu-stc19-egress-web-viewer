@@ -283,7 +283,7 @@ export class EDLRenderer{
         
 
         viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtEDL, {
-          clipSpheres: viewer.scene.volumes.filter(v => (v instanceof PointVolume)),
+          clipSpheres: viewer.scene.heatPoints,
           transparent: false,
         });
       }
