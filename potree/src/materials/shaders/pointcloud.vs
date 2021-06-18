@@ -921,11 +921,15 @@ void main() {
 
     for (int i = 0; i < num_clipspheres; i++) {
       vec4 sphereLocal = uClipSpheres[i] * mvPosition;
+      // Terminate early if possible.
+      if (sphereLocal.x > threshold || sphereLocal.y > threshold) {
+        continue;
+      }
+
       float distance = length(sphereLocal.xyz);
 
       if (distance < threshold) {
-        float w = distance;
-        wm += (threshold - w);
+        wm += (threshold - distance);
       }
     }
 

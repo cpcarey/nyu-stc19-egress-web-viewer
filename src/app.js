@@ -161,7 +161,7 @@ function drawClippingSpheres(
     viewer, data, dimensionIndex=null, radius=CLIPPING_SPHERE_THRESHOLD) {
   for (const datum of data) {
     const {center} = datum;
-    const volume = new Potree.SphereVolume();
+    const volume = new Potree.PointVolume();
 
     if (datum.record && dimensionIndex !== null) {
       const dimensionValue = datum.record[dimensionIndex];
@@ -175,7 +175,8 @@ function drawClippingSpheres(
     volume.scale.set(radius, radius, radius);
     volume.position.set(center[0], center[1], 160);
     volume.visible = false;
-    viewer.scene.addVolume(volume);
+
+    viewer.scene.addHeatPoint(volume);
   }
 }
 
