@@ -1,0 +1,51 @@
+.legend-container {
+  bottom: 16px;
+  position: absolute;
+  right: 16px;
+  z-index: 1;
+}
+
+.legend-container .legend {
+  background: rgba(255, 255, 255, 0.75);
+  cursor: default;
+  font-family: "Open Sans", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 28px;
+  visibility: none;
+}
+
+.legend-container .legend li.dimension-value {
+  list-style-type: none;
+  padding: 0 12px 0 8px;
+}
+
+.legend-container .legend li.dimension-value:before {
+  content: '■'; 
+  font-size: 24px;
+  line-height: 28px;
+  margin: 0 6px 0 2px;
+}
+
+.legend-container .legend li.dimension-value:hover {
+  background: #fff;
+}
+
+.legend-container .legend li.dimension-value.segment-0:before {
+  color: #0080ff;
+}
+
+.legend-container .legend li.dimension-value.segment-1:before {
+  color: #ff8000;
+}
+
+.legend-container .legend ul.dimension-values {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding-inline-start: 0;
+}
+
+.legend-container .legend .dimension-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}

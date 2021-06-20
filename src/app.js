@@ -92,7 +92,26 @@ function drawClippingSpheres(
     viewer.scene.addHeatPoint(volume);
   }
 
-  console.log(dimensionValueMap);
+  drawLegend(dimension, [...dimensionValueMap.keys()]);
+}
+
+function drawLegend(dimension, dimensionValues) {
+  const legendEl = document.querySelector('.legend');
+  const valuesEl = legendEl.querySelector('.dimension-values');
+  while (valuesEl.firstChild) {
+    valuesEl.removeChild(valuesEl.firstChild);
+  }
+  for (let i = 0; i < dimensionValues.length; i++) {
+    const valueEl = document.createElement('li');
+    valueEl.classList.add('dimension-value');
+    valueEl.classList.add(`segment-${i}`);
+    valueEl.innerHTML = dimensionValues[i];
+    valuesEl.appendChild(valueEl);
+  }
+
+  if (dimensionValues.length) {
+    legendEl.style.visibility = 'visible';
+  }
 }
 
 
