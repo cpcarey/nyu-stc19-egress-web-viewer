@@ -64,7 +64,7 @@ function render(geoJsonData) {
       datum.center = getPolygonCenter(datum.blob);
     }
 
-    drawClippingSpheres(viewer, geoJsonData);
+    drawClippingSpheres(viewer, geoJsonData, Dimension.GENDER);
     drawer.shadeEnvironment(e.pointcloud);
   });
 };
