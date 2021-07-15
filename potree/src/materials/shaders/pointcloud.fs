@@ -11,7 +11,6 @@ uniform mat4 uViewInv;
 uniform mat4 uProjInv;
 uniform vec3 cameraPosition;
 
-
 uniform mat4 projectionMatrix;
 uniform float uOpacity;
 
