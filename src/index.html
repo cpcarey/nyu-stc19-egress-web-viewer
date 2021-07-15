@@ -31,12 +31,40 @@
 
   <script src="../potree/build/potree/potree.js"></script>
 
-  <div class="potree_container" style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px; ">
+  <div class="potree_container">
     <div id="potree_render_area"></div>
-    <div class="legend-container">
-      <div class="legend">
-        <ul class="dimension-values"></ul>
+  </div>
+
+  <div class="color-scale-container">
+    <div class="label-axis label-axis-x-top">
+      <div class="label-dimension-value-1"></div>
+      <div class="spacer"></div>
+      <div class="label-dimension-value-2"></div>
+    </div>
+    <div class="color-scale-container-center">
+      <div class="label-axis label-axis-y-left">
+        <div class="arrow-axis"></div>
+        <div class="label-metric">Accumulated Exposure</div>
+        <div class="arrowhead"></div>
       </div>
+      <div class="color-scale">
+        <div class="color-scale-layer-left color-1"></div>
+        <div class="color-scale-layer-left color-max"></div>
+        <div class="color-scale-layer-left color-min"></div>
+
+        <div class="color-scale-layer-right color-2"></div>
+        <div class="color-scale-layer-right color-max"></div>
+        <div class="color-scale-layer-right color-min"></div>
+      </div>
+      <div class="label-axis label-axis-y-right"></div>
+    </div>
+    <div class="label-axis label-axis-x-bottom">
+      <div class="arrow-axis"></div>
+      <div class="label-dimension"></div>
+      <div class="arrowhead-left"></div>
+      <div class="arrowhead-right"></div>
+      <div class="label-100-left">100%</div>
+      <div class="label-100-right">100%</div>
     </div>
   </div>
 

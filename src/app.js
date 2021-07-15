@@ -96,22 +96,15 @@ function drawClippingSpheres(
 }
 
 function drawLegend(dimension, dimensionValues) {
-  const legendEl = document.querySelector('.legend');
-  const valuesEl = legendEl.querySelector('.dimension-values');
-  while (valuesEl.firstChild) {
-    valuesEl.removeChild(valuesEl.firstChild);
-  }
-  for (let i = 0; i < dimensionValues.length; i++) {
-    const valueEl = document.createElement('li');
-    valueEl.classList.add('dimension-value');
-    valueEl.classList.add(`segment-${i}`);
-    valueEl.innerHTML = dimensionValues[i];
-    valuesEl.appendChild(valueEl);
-  }
-
-  if (dimensionValues.length) {
-    legendEl.style.visibility = 'visible';
-  }
+  const labelDimensionValue1 =
+      document.querySelector('.label-dimension-value-1');
+  const labelDimensionValue2 =
+      document.querySelector('.label-dimension-value-2');
+  const labelDimension =
+      document.querySelector('.label-dimension');
+  labelDimensionValue1.innerHTML = dimensionValues[0];
+  labelDimensionValue2.innerHTML = dimensionValues[1];
+  labelDimension.innerHTML = DIMENSION_NAMES.get(dimension);
 }
 
 
