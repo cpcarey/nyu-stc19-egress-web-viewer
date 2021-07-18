@@ -971,20 +971,24 @@ void main() {
       vColor += remainingColor * colorFilter;
     }
     #endif
+    float acc_max = 1.0;
 
     #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
     if (acc1 > 0.0 || acc2 > 0.0) {
-      acc1 /= float(num_clipspheres) * 0.5 * alpha;
-      acc2 /= float(num_clipspheres) * 0.5 * alpha;
+      acc1 /= acc_max;
+      acc2 /= acc_max;
 
-      float intensity = 5.0;
+      float intensity = 1.0;
 
       vec3 colorFilter1 = getColorFilter(acc1, ACC_COLOR_MAX_1, intensity);
       vec3 colorFilter2 = getColorFilter(acc2, ACC_COLOR_MAX_2, intensity);
       vec3 remainingColor = (1.0 - vColor);
 
-      vColor += remainingColor * colorFilter1;
-      vColor += remainingColor * colorFilter2;
+      float n1 = 2.0 * float(num_clipspheres_segment1) / float(num_clipspheres);
+      float n2 = 2.0 * float(num_clipspheres_segment2) / float(num_clipspheres);
+
+      vColor += (remainingColor * colorFilter1) * n1;
+      vColor += (remainingColor * colorFilter2) * n2;
     }
     #endif
   #endif
