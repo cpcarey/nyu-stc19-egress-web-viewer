@@ -1,0 +1,58 @@
+.controls {
+  align-items: center;
+  background: #111;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: 32px;
+  position: absolute;
+  right: 0;
+  width: 384px;
+}
+
+.select-header {
+  width: 256px;
+  text-align: left;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+
+select {
+  appearance: none;
+  background: #222;
+  border: 0 !important;
+  color: #fff;
+  cursor: pointer;
+  flex: 1;
+  outline: 0;
+  padding: 0 8px;
+}
+
+.select-container {
+  background: #222;
+  display: flex;
+  height: 32px;
+  line-height: 2;
+  overflow: hidden;
+  position: relative;
+  width: 256px;
+}
+
+.select-container::after {
+  background: #333;
+  color: #ddd;
+  content: '\25BC';
+  cursor: pointer;
+  padding: 0 8px;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: .2s all ease;
+}
+
+.select-container:hover::after {
+  color: #fff;
+}

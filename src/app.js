@@ -153,6 +153,7 @@ function reset(geoJsonData) {
   }
 }
 
+/** Renders the Potree visualization with the given dimension. */
 window.renderDimension = async (dimension) => {
   const geoJsonData = await dataStore.getGeoJsonData();
   reset(geoJsonData);
@@ -168,3 +169,12 @@ window.renderGenderDimension = () => {
 };
 
 document.addEventListener('DOMContentLoaded', run);
+
+document.querySelector('.selector-dimension')
+  .addEventListener('change', (e) => {
+    const value = parseInt(e.target.value);
+    console.log('Render Dimension: ', value);
+    // TODO: Change this function to render the selected dimension.
+  });
+
+// TODO: Add a way for the user to render no dimension.
