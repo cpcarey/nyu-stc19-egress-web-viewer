@@ -174,4 +174,7 @@ document.querySelector('.selector-dimension')
   .addEventListener('change', (e) => {
     const value = parseInt(e.target.value);
     console.log('Render Dimension: ', value);
+    // TODO: Change this function to render the selected dimension.
   });
+
+// TODO: Add a way for the user to render no dimension.
