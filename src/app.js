@@ -64,7 +64,7 @@ function render(geoJsonData) {
       datum.center = getPolygonCenter(datum.blob);
     }
 
-    drawClippingSpheres(viewer, geoJsonData, Dimension.GENDER);
+    drawClippingSpheres(viewer, geoJsonData, Dimension.TOUCH_BINARY);
     drawer.shadeEnvironment(e.pointcloud);
   });
 };
@@ -153,6 +153,7 @@ function reset(geoJsonData) {
   }
 }
 
+/** Renders the Potree visualization with the given dimension. */
 window.renderDimension = async (dimension) => {
   const geoJsonData = await dataStore.getGeoJsonData();
   reset(geoJsonData);
@@ -168,3 +169,9 @@ window.renderGenderDimension = () => {
 };
 
 document.addEventListener('DOMContentLoaded', run);
+
+document.querySelector('.selector-dimension')
+  .addEventListener('change', (e) => {
+    const value = parseInt(e.target.value);
+    console.log('Render Dimension: ', value);
+  });

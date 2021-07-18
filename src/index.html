@@ -12,6 +12,7 @@
   <link rel="stylesheet" type="text/css" href="../libs/openlayers3/ol.css">
   <link rel="stylesheet" type="text/css" href="../libs/spectrum/spectrum.css">
   <link rel="stylesheet" type="text/css" href="../libs/jstree/themes/mixed/style.css">
+  <link rel="stylesheet" type="text/css" href="./controls.css">
   <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 
@@ -35,36 +36,50 @@
     <div id="potree_render_area"></div>
   </div>
 
-  <div class="color-scale-container">
-    <div class="label-axis label-axis-x-top">
-      <div class="label-dimension-value-1"></div>
-      <div class="spacer"></div>
-      <div class="label-dimension-value-2"></div>
-    </div>
-    <div class="color-scale-container-center">
-      <div class="label-axis label-axis-y-left">
-        <div class="arrow-axis"></div>
-        <div class="label-metric">Accumulated Exposure</div>
-        <div class="arrowhead"></div>
+  <div class="control-panel">
+    <div class="controls">
+      <div class="select-header">Dimension</div>
+      <div class="select-container">
+        <select class="selector-dimension">
+          <option value="16">GENDER</option>
+          <option value="14">TIME_TYPE</option>
+          <option value="34">RE_MEDICAL</option>
+          <option value="35">MECH_TRANS</option>
+          <option value="24">TOUCH_BINARY</option>
+        </select>
       </div>
-      <div class="color-scale">
-        <div class="color-scale-layer-left color-1"></div>
-        <div class="color-scale-layer-left color-max"></div>
-        <div class="color-scale-layer-left color-min"></div>
+    </div>
+    <div class="color-scale-container">
+      <div class="label-axis label-axis-x-top">
+        <div class="label-dimension-value-1"></div>
+        <div class="spacer"></div>
+        <div class="label-dimension-value-2"></div>
+      </div>
+      <div class="color-scale-container-center">
+        <div class="label-axis label-axis-y-left">
+          <div class="arrow-axis"></div>
+          <div class="label-metric">Accumulated Exposure</div>
+          <div class="arrowhead"></div>
+        </div>
+        <div class="color-scale">
+          <div class="color-scale-layer-left color-1"></div>
+          <div class="color-scale-layer-left color-max"></div>
+          <div class="color-scale-layer-left color-min"></div>
 
-        <div class="color-scale-layer-right color-2"></div>
-        <div class="color-scale-layer-right color-max"></div>
-        <div class="color-scale-layer-right color-min"></div>
+          <div class="color-scale-layer-right color-2"></div>
+          <div class="color-scale-layer-right color-max"></div>
+          <div class="color-scale-layer-right color-min"></div>
+        </div>
+        <div class="label-axis label-axis-y-right"></div>
       </div>
-      <div class="label-axis label-axis-y-right"></div>
-    </div>
-    <div class="label-axis label-axis-x-bottom">
-      <div class="arrow-axis"></div>
-      <div class="label-dimension"></div>
-      <div class="arrowhead-left"></div>
-      <div class="arrowhead-right"></div>
-      <div class="label-100-left">100%</div>
-      <div class="label-100-right">100%</div>
+      <div class="label-axis label-axis-x-bottom">
+        <div class="arrow-axis"></div>
+        <div class="label-dimension"></div>
+        <div class="arrowhead-left"></div>
+        <div class="arrowhead-right"></div>
+        <div class="label-100-left">100%</div>
+        <div class="label-100-right">100%</div>
+      </div>
     </div>
   </div>
 
