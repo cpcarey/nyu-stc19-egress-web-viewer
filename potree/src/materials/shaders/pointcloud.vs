@@ -143,8 +143,8 @@ float round(float number){
 }
 
 vec3 ACC_COLOR_MAX = vec3(1.0, 0.5, 0.0);
-vec3 ACC_COLOR_MAX_1 = vec3(0.0, 0.5, 1.0);
-vec3 ACC_COLOR_MAX_2 = vec3(1.0, 0.5, 0.0);
+vec3 ACC_COLOR_MAX_1 = vec3(1.0, 0.5, 0.0);
+vec3 ACC_COLOR_MAX_2 = vec3(0.0, 0.5, 1.0);
 
 // 
 //    ###    ########     ###    ########  ######## #### ##     ## ########     ######  #### ######## ########  ######  
