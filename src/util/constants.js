@@ -11,7 +11,7 @@ export const CODE = '22242';
 export const URL_CLOUD = `http://localhost:1234/data/${CODE}.las_converted/metadata.json`;
 
 // Constants for processing data.
-export const CLIPPING_SPHERE_THRESHOLD = 50;
+export const CLIPPING_SPHERE_RADIUS = 50;
 
 export const LAT_MIN = 40.8391;
 export const LAT_MAX = 40.8322;
