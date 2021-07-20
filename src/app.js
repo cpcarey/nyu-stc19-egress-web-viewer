@@ -3,15 +3,16 @@ import {Line2} from '../libs/three.js/lines/Line2.js';
 import {LineGeometry} from '../libs/three.js/lines/LineGeometry.js';
 import {LineMaterial} from '../libs/three.js/lines/LineMaterial.js';
 
-import {DataStore} from './data_store.js';
-import * as constants from './constants.js';
-import * as drawer from './drawer.js';
-import * as util from './util.js';
-import {Dimension, DIMENSION_NAMES} from './dimension.js';
+import {DataStore} from './data_store/data_store.js';
+import * as constants from './util/constants.js';
+import * as drawer from './util/drawer.js';
+import * as util from './util/util.js';
+import {Dimension, DIMENSION_NAMES} from './util/dimension.js';
 
+const dataStore = new DataStore();
 let viewer;
 
-function init() {
+function initPotreeViewer() {
   viewer =
       new Potree.Viewer(
           document.getElementById('potree_render_area'));
@@ -61,7 +62,7 @@ function render(geoJsonData) {
 
     for (const datum of geoJsonData) {
       datum.blob = util.convertLatLonsToCoordSpace(datum.coords, min, max);
-      datum.center = getPolygonCenter(datum.blob);
+      datum.center = util.getPolygonCenter(datum.blob);
     }
 
     drawClippingSpheres(viewer, geoJsonData, Dimension.GENDER);
@@ -83,6 +84,7 @@ function drawClippingSpheres(
         dimensionValueMap.set(dimensionValue, dimensionValueMap.size);
       }
       volume.category = dimensionValueMap.get(dimensionValue);
+      console.log(dimensionValue, volume.category);
     }
 
     volume.scale.set(radius, radius, radius);
@@ -107,56 +109,22 @@ function drawLegend(dimension, dimensionValues) {
   labelDimension.innerHTML = DIMENSION_NAMES.get(dimension);
 }
 
-
-/**
- * Returns an array of coordinates representing the array of bounding box
- * centers of the given polygons.
- * @param polygons Groups of coordinates in Potree coordinate space forming the
- *     outlines of polygons
- */
-function getPolygonCenter(polygon) {
-  // Extract bounding box of polygon.
-  const xCoords = polygon.map((coord) => coord[0]);
-  const yCoords = polygon.map((coord) => coord[1]);
-
-  const box = {
-    left: Math.min(...xCoords),
-    right: Math.max(...xCoords),
-    top: Math.min(...yCoords),
-    bottom: Math.max(...yCoords),
-  };
-
-  // Return center of polygon bounding box.
-  return [(box.left + box.right) / 2, (box.top + box.bottom) / 2];
-}
-
-function hasQueryParam(query, value) {
-  return Boolean(window.location.search.match(`${query}=${value}`));
-}
-
-
-
-let circlesData = null;
-let csvData = null;
-
-const dataStore = new DataStore();
-
-async function run() {
-  init();
-  const geoJsonData = await dataStore.getGeoJsonData();
-  render(geoJsonData);
-}
-
-function reset(geoJsonData) {
+function resetPotreeViewer(geoJsonData) {
   while (viewer.scene.volumes.length) {
     viewer.scene.removeVolume(viewer.scene.volumes[0]);
   }
 }
 
+async function run() {
+  initPotreeViewer();
+  const geoJsonData = await dataStore.getGeoJsonData();
+  render(geoJsonData);
+}
+
 /** Renders the Potree visualization with the given dimension. */
 window.renderDimension = async (dimension) => {
   const geoJsonData = await dataStore.getGeoJsonData();
-  reset(geoJsonData);
+  resetPotreeViewer(geoJsonData);
   drawClippingSpheres(viewer, geoJsonData, dimension);
 };
 

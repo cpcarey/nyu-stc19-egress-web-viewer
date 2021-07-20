@@ -1,4 +1,4 @@
-import * as THREE from '../libs/three.js/build/three.module.js';
+import * as THREE from '../../libs/three.js/build/three.module.js';
 
 /**
  * Draws a 3D bar chart visualization representing the number of overlaps at the
