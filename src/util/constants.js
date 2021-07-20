@@ -13,6 +13,7 @@ export const URL_CLOUD = `http://localhost:1234/data/${CODE}.las_converted/metad
 // Constants for processing data.
 export const CLIPPING_SPHERE_RADIUS = 50;
 
+export const GROUND_Z = 160;
 export const LAT_MIN = 40.8391;
 export const LAT_MAX = 40.8322;
 export const LON_MIN = -73.8618;

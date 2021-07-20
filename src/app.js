@@ -110,14 +110,14 @@ function drawClippingSpheres(
   const dimensionValueToSegmentIndexMap = new Map();
 
   // Create a Potree clipping sphere for each behavorial point.
-  for (const geoJsonDatum of geoJsonData) {
+  for (const datum of geoJsonData) {
     // Create a Potree PointVolume object to pass information to the Potree
     // shader with. PointVolume is a custom type modeled after SphereVolume,
     // but with unneeded features removed for improved performance.
     const volume = new Potree.PointVolume();
 
     if (dimension !== null && datum.record) {
-      // Extract the dimension value from the datum's record based on the
+      // Extract the dimension value from the geoJsonDatum's record based on the
       // attribute column index of the given dimension by which to segment
       // data, e.g. "Female", "Male".
       const dimensionValue = datum.record[dimension];
@@ -136,11 +136,11 @@ function drawClippingSpheres(
       volume.category = dimensionValueToSegmentIndexMap.get(dimensionValue);
     }
 
-    const {center} = geoJsonDatum;
+    const {center} = datum;
     // The constant GROUND_Z_VALUE is set as the approximate constant z-value of
     // ground level in the observed region.
-    volume.position.set(center[0], center[1], constants.GROUND_Z_VALUE);
     volume.scale.set(radius, radius, radius);
+    volume.position.set(center[0], center[1], constants.GROUND_Z);
     volume.visible = false;
 
     // Potree was modified to treat these clipping spheres separately for
@@ -151,7 +151,7 @@ function drawClippingSpheres(
 
   // Update the legend to reflect the dimension and dimension values observed in
   // the data.
-  drawLegend(dimension, [...dimensionValueMap.keys()]);
+  drawLegend(dimension, [...dimensionValueToSegmentIndexMap.keys()]);
 }
 
 /**
