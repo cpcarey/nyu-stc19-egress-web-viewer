@@ -176,12 +176,12 @@ function drawLegend(dimension, dimensionValues) {
 }
 
 /**
- * Resets the Potree viewer by removing all of the Potree.PointVolume volumes
+ * Resets the Potree viewer by removing all of the Potree.HeatPoint volumes
  * which might have been added previously.
  */
 function resetPotreeViewer() {
-  while (viewer.scene.volumes.length) {
-    viewer.scene.removeVolume(viewer.scene.volumes[0]);
+  while (viewer.scene.heatPoints.length) {
+    viewer.scene.removeHeatPoint(viewer.scene.heatPoints[0]);
   }
 }
 
