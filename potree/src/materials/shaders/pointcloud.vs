@@ -978,31 +978,21 @@ void main() {
     }
     #endif
 
-    float acc_max = 2.0;
+    float acc_max = 4.0;
     float intensity = 1.0;
 
     #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
     if (acc > 0.0) {
-      acc /= acc_max;
-
-      vec3 colorFilter = getColorFilter(acc, ACC_COLOR_MAX, intensity);
-      vec3 remainingColor = (1.0 - vColor);
-
-      vColor += remainingColor * colorFilter;
+      vec3 a1Color = vColor + (ACC_COLOR_MAX_1 - vColor) * min(1.0, (acc / acc_max));
+      vColor = a1Color;
     }
     #endif
 
     #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
     if (acc1 > 0.0 || acc2 > 0.0) {
-      vec3 colorFilter1 = getColorFilter(acc1, ACC_COLOR_MAX_1, intensity);
-      vec3 colorFilter2 = getColorFilter(acc2, ACC_COLOR_MAX_2, intensity);
-      vec3 remainingColor = (1.0 - vColor);
+      acc_max /= 2.0;
 
-      vec3 c1 = (ACC_COLOR_MAX_1 - vColor) * acc1 * min(1.0, n1 / ((n1 + n2) / 1.0));
-      vec3 c2 = (ACC_COLOR_MAX_2 - vColor) * acc2 * min(1.0, n2 / ((n1 + n2) / 1.0));
-      //vColor += c1 + c2;
-
-      if (acc1 > acc2) {
+      if (acc1 >= acc2) {
         vec3 a1Color = vColor + (ACC_COLOR_MAX_1 - vColor) * min(1.0, (acc1 + acc2) / (2.0 * acc_max));
         vec3 a2Color = vColor + (ACC_COLOR_MAX_MID - vColor) * min(1.0, (acc1 + acc2) / (2.0 * acc_max));
         vec3 bColor = a1Color + (a2Color - a1Color) * (acc2 / acc1);
@@ -1014,10 +1004,6 @@ void main() {
         vec3 a2Color = vColor + (ACC_COLOR_MAX_MID - vColor) * min(1.0, (acc1 + acc2) / (2.0 * acc_max));
         vec3 bColor = a1Color + (a2Color - a1Color) * (acc1 / acc2);
         vColor = bColor;
-      }
-
-      if (acc1 == acc2) {
-        vColor = vec3(1.0, 1.0, 1.0);
       }
     }
     #endif
