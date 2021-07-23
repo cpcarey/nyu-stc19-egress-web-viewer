@@ -1,7 +1,15 @@
 body {
   background: #000;
+  display: flex;
   font-family: "Open Sans", Arial, sans-serif;
   font-size: 16px;
+  justify-content: space-between;
+}
+
+.potree_container {
+  height: 100%;
+  position: relative;
+  width: 100%;
 }
 
 #reset_button {
@@ -15,18 +23,25 @@ body {
   text-align: center;
   text-decoration: none;
 }
-.color-scale-container {
-  background: #000;
-  bottom: 0;
-  height: 384px;
-  position: absolute;
-  right: 0;
-  width: 384px;
-  z-index: 100;
+
+.control-panel {
+  background: #222;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
+  width: 384px;
+  height: 100%;
+}
+
+.color-scale-container {
   align-items: center;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  height: 128px;
+  justify-content: center;
+  padding: 16px 0;
+  width: 100%;
 }
 
 .color-scale-container-center {
@@ -47,29 +62,15 @@ body {
 }
 
 .color-scale {
+  background: linear-gradient(
+     to left,
+     rgba(0, 127, 255, 1.0) 0%,
+     rgba(255, 255, 255, 1.0) 50%,
+     rgba(255, 127, 0, 1.0) 100%);
   flex-basis: 256px;
   position: relative;
-  background: #fff;
-  height: 256px;
+  height: 32px;
   width: 256px;
-}
-
-.label-axis-y-left .arrow-axis {
-  border-right: 1px solid #fff;
-  position: absolute;
-  height: 240px;
-  left: 48px;
-}
-
-.label-axis-y-left .arrowhead {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  top: 72px;
-  left: 44px;
-  transform: rotate(45deg);
 }
 
 .label-axis-x-bottom {
@@ -119,50 +120,6 @@ body {
   color: rgb(0, 127, 255);
   top: 8px;
   right: -20px;
-}
-
-.color-scale-layer-left,
-.color-scale-layer-right {
-  bottom: 0;
-  position: absolute;
-  top: 0;
-}
-
-.color-scale-layer-left {
-  left: 0;
-  right: 50%;
-}
-
-.color-scale-layer-right {
-  left: 50%;
-  right: 0;
-  transform: scale(-1, 1);
-}
-
-.color-scale .color-1 {
-  background: linear-gradient(rgba(255, 127, 0, 1.0), rgba(0, 0, 0, 0));
-}
-
-.color-scale .color-2 {
-  background: linear-gradient(rgba(0, 127, 255, 1.0), rgba(0, 0, 0, 0));
-}
-
-.color-scale .color-max {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(255, 255, 255, 1.0));
-}
-
-.color-scale .color-min {
-  background: linear-gradient(0deg, rgba(122, 122, 122, 1.0), rgba(0, 0, 0, 0));
-}
-
-.potree_container {
-  height: auto;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  right: 384px;
-  position: absolute;
-  width: auto;
 }
 
 .label-axis {

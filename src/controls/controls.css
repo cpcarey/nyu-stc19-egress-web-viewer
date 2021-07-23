@@ -6,9 +6,8 @@
   flex-direction: column;
   height: 100%;
   padding-top: 32px;
-  position: absolute;
   right: 0;
-  width: 384px;
+  width: 100%;
 }
 
 .select-header {
