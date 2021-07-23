@@ -8,7 +8,7 @@ export const CAMERA_LOOK_AT_Z = 100;
 
 // Constants for loading data.
 export const CODE = '22242';
-export const URL_CLOUD = `http://localhost:1234/data/${CODE}.las_converted/metadata.json`;
+export const URL_CLOUD = `http://localhost:5005/data/${CODE}.las_converted/metadata.json`;
 
 // Constants for processing data.
 export const CLIPPING_SPHERE_RADIUS = 50;

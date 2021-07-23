@@ -878,6 +878,9 @@ vec3 getColorFilter(float accumulation, vec3 colorMax, float intensity) {
   vec3 colorGradient =
       texture2D(gradient, vec2(1.0 - accumulation, accumulation)).rgb;
   vec3 colorFilter = (1.0 - colorGradient) * colorMax * intensity;
+  colorFilter.r = min(colorMax.r, colorFilter.r);
+  colorFilter.g = min(colorMax.g, colorFilter.g);
+  colorFilter.b = min(colorMax.b, colorFilter.b);
   return colorFilter;
 }
 
@@ -942,10 +945,9 @@ void main() {
 
     float alpha = 0.1 * threshold * threshold;
 
-    #if !defined(num_clipspheres_segment1)
-    vec4[num_clipspheres] sphereLocal = uClipSpheres * mvPosition;
+    #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
     for (int i = 0; i < num_clipspheres; i++) {
-      acc += getAccumulation(sphereLocal[i]);
+      acc += getAccumulation(uClipSpheres[i], mvPosition);
     }
     #endif
 
@@ -960,28 +962,28 @@ void main() {
       acc2 += getAccumulation(uClipSpheresSegment2[i], mvPosition);
     }
     #endif
-    #
-    #if !defined(num_clipspheres_segment1)
-    if (acc > 0.0) {
-      acc /= float(num_clipspheres) * 0.5 * alpha;
 
-      vec3 colorFilter = getColorFilter(acc, ACC_COLOR_MAX, 1.0);
+    float acc_max = 4.0;
+    float intensity = 1.0;
+
+    #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
+    if (acc > 0.0) {
+      acc /= acc_max;
+
+      vec3 colorFilter = getColorFilter(acc, ACC_COLOR_MAX, intensity);
       vec3 remainingColor = (1.0 - vColor);
 
       vColor += remainingColor * colorFilter;
     }
     #endif
-    float acc_max = 1.0;
 
     #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
     if (acc1 > 0.0 || acc2 > 0.0) {
-      acc1 /= acc_max;
-      acc2 /= acc_max;
+      acc1 /= acc_max * 0.5;
+      acc2 /= acc_max * 0.5;
 
-      float intensity = 1.0;
-
-      vec3 colorFilter1 = getColorFilter(acc1, ACC_COLOR_MAX_1, intensity);
-      vec3 colorFilter2 = getColorFilter(acc2, ACC_COLOR_MAX_2, intensity);
+      vec3 colorFilter1 = getColorFilter(acc1, ACC_COLOR_MAX_1, 2.0 * intensity);
+      vec3 colorFilter2 = getColorFilter(acc2, ACC_COLOR_MAX_2, 2.0 * intensity);
       vec3 remainingColor = (1.0 - vColor);
 
       float n1 = 2.0 * float(num_clipspheres_segment1) / float(num_clipspheres);

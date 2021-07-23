@@ -1,8 +1,8 @@
 import {CsvDataFetcher} from './csv_data_fetcher.js';
 import {GeoJsonDataFetcher} from './geo_json_data_fetcher.js';
 
-const CSV_DATA_URL = 'http://localhost:1234/data/all_records_dta_09142020.csv';
-const GEO_JSON_DATA_URL = 'http://localhost:1234/data/circles_20200330CH_ChrisJose.geojson';
+const CSV_DATA_URL = 'http://localhost:5005/data/all_records_dta_09142020.csv';
+const GEO_JSON_DATA_URL = 'http://localhost:5005/data/circles_20200330CH_ChrisJose.geojson';
 
 export class DataStore {
   /** @private {{csvData: ?Array<!Object>, geoJsonData: ?Array<!Object>}} */

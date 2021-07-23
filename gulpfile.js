@@ -17,7 +17,7 @@ gulp.task('build-potree', async function(done) {
 
 gulp.task('webserver', gulp.series(async function() {
   server = connect.server({
-    port: 1234,
+    port: 5005,
     https: false,
   });
 }));

@@ -176,12 +176,12 @@ function drawLegend(dimension, dimensionValues) {
 }
 
 /**
- * Resets the Potree viewer by removing all of the Potree.PointVolume volumes
+ * Resets the Potree viewer by removing all of the Potree.HeatPoint volumes
  * which might have been added previously.
  */
 function resetPotreeViewer() {
-  while (viewer.scene.volumes.length) {
-    viewer.scene.removeVolume(viewer.scene.volumes[0]);
+  while (viewer.scene.heatPoints.length) {
+    viewer.scene.removeHeatPoint(viewer.scene.heatPoints[0]);
   }
 }
 
@@ -213,15 +213,24 @@ window.renderNoDimension = () => {
   renderDimension(null);
 };
 
-window.renderGenderDimension = () => {
-  renderDimension(Dimension.GENDER);
-};
+
 
 document.querySelector('.selector-dimension')
-  .addEventListener('change', (e) => {
-    const value = parseInt(e.target.value);
-    console.log('Render Dimension: ', value);
-    // TODO: Change this function to render the selected dimension.
-  });
+    .addEventListener('change', (e) => {
+      const value = parseInt(e.target.value);
+      console.log('Render Dimension: ', e.target.value);
+      if (value === Dimension.NO_DIMENSION) {
+        renderNoDimension();
+        console.log('Reinicio ');
+      }
+      if (value !== Dimension.NO_DIMENSION) {
+        renderDimension(value);
+        console.log('normal ');
+      }
+    });
 
-// TODO: Add a way for the user to render no dimension.
+const button = document.getElementById('reset_button');
+button.onclick = function() {
+  console.log('Reset dimension');
+  renderNoDimension();
+};
