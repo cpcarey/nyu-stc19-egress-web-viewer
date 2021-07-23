@@ -155,13 +155,17 @@ function drawClippingSpheres(
 }
 
 /**
- * @param {!Dimension} dimension The Dimension by which data were segmented,
+ * @param {?Dimension} dimension The Dimension by which data were segmented,
  *     e.g. Dimension.GENDER
  * @param {!Array<(string|number|null)>} dimensionValues The dimension values
  *     indexed by the segment index for which they corresponding to,
  *     e.g. ["Female", "Male"]
  */
 function drawLegend(dimension, dimensionValues) {
+  // Show/hide color scale based on whether a dimension is provided.
+  const colorScaleEl = document.querySelector('.color-scale-container');
+  colorScaleEl.style.visibility = (dimension === null) ? 'hidden' : 'visible';
+
   // Replace the inner HTML content of the corresponding legend HTML elements
   // the values and display names extracted from the data.
   const labelDimensionValue1 =
