@@ -878,9 +878,6 @@ vec3 getColorFilter(float accumulation, vec3 colorMax, float intensity) {
   vec3 colorGradient =
       texture2D(gradient, vec2(1.0 - accumulation, accumulation)).rgb;
   vec3 colorFilter = (1.0 - colorGradient) * colorMax * intensity;
-  colorFilter.r = min(colorMax.r, colorFilter.r);
-  colorFilter.g = min(colorMax.g, colorFilter.g);
-  colorFilter.b = min(colorMax.b, colorFilter.b);
   return colorFilter;
 }
 
@@ -986,8 +983,12 @@ void main() {
       vec3 colorFilter2 = getColorFilter(acc2, ACC_COLOR_MAX_2, 2.0 * intensity);
       vec3 remainingColor = (1.0 - vColor);
 
-      float n1 = 2.0 * float(num_clipspheres_segment1) / float(num_clipspheres);
-      float n2 = 2.0 * float(num_clipspheres_segment2) / float(num_clipspheres);
+      colorFilter1.r = min(ACC_COLOR_MAX.r, colorFilter1.r);
+      colorFilter1.g = min(ACC_COLOR_MAX.g, colorFilter1.g);
+      colorFilter1.b = min(ACC_COLOR_MAX.b, colorFilter1.b);
+
+      float n1 = min(1.0, 2.0 * float(num_clipspheres_segment1) / float(num_clipspheres));
+      float n2 = min(1.0, 2.0 * float(num_clipspheres_segment2) / float(num_clipspheres));
 
       vColor += (remainingColor * colorFilter1) * n1;
       vColor += (remainingColor * colorFilter2) * n2;
