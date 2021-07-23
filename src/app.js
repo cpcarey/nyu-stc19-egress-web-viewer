@@ -147,9 +147,13 @@ async function run() {
   render(geoJsonData);
 }
 
-function reset(geoJsonData) {
-  while (viewer.scene.volumes.length) {
-    viewer.scene.removeVolume(viewer.scene.volumes[0]);
+/**
+ * Resets the Potree viewer by removing all of the Potree.HeatPoint volumes
+ * which might have been added previously.
+ */
+function reset() {
+  while (viewer.scene.heatPoints.length) {
+    viewer.scene.removeHeatPoint(viewer.scene.heatPoints[0]);
   }
 }
 
