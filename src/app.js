@@ -164,17 +164,32 @@ window.renderNoDimension = () => {
   renderDimension(null);
 };
 
-window.renderGenderDimension = () => {
-  renderDimension(Dimension.GENDER);
-};
+
 
 document.addEventListener('DOMContentLoaded', run);
 
 document.querySelector('.selector-dimension')
   .addEventListener('change', (e) => {
     const value = parseInt(e.target.value);
-    console.log('Render Dimension: ', value);
+    console.log('Render Dimension: ', e.target.value);
+    if (value==112){
+      renderNoDimension();
+      console.log('Reinicio ');
+    }
+    if(value != 112){
+    renderDimension(value);
+    console.log('normal ');
+    }
     // TODO: Change this function to render the selected dimension.
   });
+  
+   
+   var button =document.getElementById('reset_button');
+   button.onclick= function (){
+
+    console.log('Reset dimension');
+    renderNoDimension();
+   }
+
 
 // TODO: Add a way for the user to render no dimension.
