@@ -1,6 +1,7 @@
 // The numeric value corresponds to the column index of the dimension in the
 // DETER CSV data.
 export const Dimension = Object.freeze({
+  NO_DIMENSION: 112,
   GENDER: 16,
   TIME_TYPE: 14,
   RE_MEDICAL: 34,
@@ -9,6 +10,7 @@ export const Dimension = Object.freeze({
 });
 
 export const DIMENSION_NAMES = Object.freeze(new Map([
+  [Dimension.NO_DIMENSION, 'NO_DIMENSION'],
   [Dimension.GENDER, 'GENDER'],
   [Dimension.MECH_TRANS, 'MECH_TRANS'],
   [Dimension.RE_MEDICAL, 'RE_MEDICAL'],

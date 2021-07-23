@@ -4,6 +4,17 @@ body {
   font-size: 16px;
 }
 
+#reset_button {
+  background-color: rgba(122, 122, 122, 1.0);
+  border: 2px solid;
+  color: white;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: 50px;
+  padding: 13px 20px;
+  text-align: center;
+  text-decoration: none;
+}
 .color-scale-container {
   background: #000;
   bottom: 0;
