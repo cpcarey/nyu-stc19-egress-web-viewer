@@ -878,6 +878,9 @@ vec3 getColorFilter(float accumulation, vec3 colorMax, float intensity) {
   vec3 colorGradient =
       texture2D(gradient, vec2(1.0 - accumulation, accumulation)).rgb;
   vec3 colorFilter = (1.0 - colorGradient) * colorMax * intensity;
+  colorFilter.r = min(colorMax.r, colorFilter.r);
+  colorFilter.g = min(colorMax.g, colorFilter.g);
+  colorFilter.b = min(colorMax.b, colorFilter.b);
   return colorFilter;
 }
 
