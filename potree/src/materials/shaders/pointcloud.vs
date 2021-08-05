@@ -975,32 +975,36 @@ void main() {
     }
     #endif
 
-    float acc_max = 4.0;
+    float acc_max = 1.0;
     float intensity = 1.0;
 
     #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
     if (acc > 0.0) {
-      vec3 a1Color = vColor + (ACC_COLOR_MAX_1 - vColor) * min(1.0, (acc / acc_max));
-      vColor = a1Color;
+      float acc_mix = min(1.0, acc / acc_max);
+      vColor += (ACC_COLOR_MAX_1 - vColor) * acc_mix;
     }
     #endif
 
     #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
     if (acc1 > 0.0 || acc2 > 0.0) {
-      acc_max /= 2.0;
+      float acc_total = min(acc1, acc_max) + min(acc2, acc_max);
+      float acc_mix = acc_total / 2.0 * acc_max;
+
+      vec3 majorityClassColor = vec3(0.0, 0.0, 0.0);
+      vec3 medianColor = vColor + (ACC_COLOR_MAX_MID - vColor) * acc_mix;
 
       if (acc1 >= acc2) {
-        vec3 a1Color = vColor + (ACC_COLOR_MAX_1 - vColor) * min(1.0, (acc1 + acc2) / (2.0 * acc_max));
-        vec3 a2Color = vColor + (ACC_COLOR_MAX_MID - vColor) * min(1.0, (acc1 + acc2) / (2.0 * acc_max));
-        vec3 bColor = a1Color + (a2Color - a1Color) * (acc2 / acc1);
-        vColor = bColor;
+        majorityClassColor = vColor + (ACC_COLOR_MAX_1 - vColor) * acc_mix;
+        vColor =
+            majorityClassColor +
+            (medianColor - majorityClassColor) * (acc2 / acc1);
       }
 
       if (acc2 > acc1) {
-        vec3 a1Color = vColor + (ACC_COLOR_MAX_2 - vColor) * (acc1 + acc2) / (2.0 * acc_max);
-        vec3 a2Color = vColor + (ACC_COLOR_MAX_MID - vColor) * min(1.0, (acc1 + acc2) / (2.0 * acc_max));
-        vec3 bColor = a1Color + (a2Color - a1Color) * (acc1 / acc2);
-        vColor = bColor;
+        majorityClassColor = vColor + (ACC_COLOR_MAX_2 - vColor) * acc_mix;
+        vColor =
+            majorityClassColor +
+            (medianColor - majorityClassColor) * (acc1 / acc2);
       }
     }
     #endif
