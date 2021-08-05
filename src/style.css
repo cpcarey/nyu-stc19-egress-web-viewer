@@ -133,23 +133,27 @@ body {
 
 .label-axis-x-bottom > .label-dimension {
   background: #000;
+  display: inline-block;
+  max-width: 160px;
+  overflow: hidden;
   padding: 8px;
-
-position: relative;
-    width: auto;
-    display: inline-block;
+  position: relative;
+  text-overflow: ellipsis;
+  width: auto;
 }
 
 .label-axis-x-top {
+  align-items: flex-end;
   display: flex;
   justify-content: space-evenly;
+  height: 40px;
   width: 100%;
 }
 
 .label-axis-x-top > div {
+  min-height: 18px;
   padding: 8px 0;
   width: 128px;
-  height: 18px;
 }
 
 .label-dimension-value-1 {

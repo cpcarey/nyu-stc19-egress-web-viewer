@@ -108,19 +108,20 @@ function drawClippingSpheres(
    * @type {!Map<!(string|number|null), number>}
    */
   const dimensionValueToSegmentIndexMap = new Map();
+  const dimensionValueCountMap = new Map();
 
   // Create a Potree clipping sphere for each behavorial point.
   for (const datum of geoJsonData) {
-    // Create a Potree PointVolume object to pass information to the Potree
-    // shader with. PointVolume is a custom type modeled after SphereVolume,
-    // but with unneeded features removed for improved performance.
-    const volume = new Potree.PointVolume();
-
     if (dimension !== null && datum.record) {
       // Extract the dimension value from the geoJsonDatum's record based on the
       // attribute column index of the given dimension by which to segment
       // data, e.g. "Female", "Male".
       const dimensionValue = datum.record[dimension];
+
+      // Ignore N/A values for now.
+      if (dimensionValue == 'NA') {
+        continue;
+      }
 
       // Add the dimension value to the segment index map if it has not yet
       // been observed and assign it the next unused segment index, which is
@@ -131,9 +132,40 @@ function drawClippingSpheres(
             dimensionValue, dimensionValueToSegmentIndexMap.size);
       }
 
+      if (!dimensionValueCountMap.has(dimensionValue)) {
+        dimensionValueCountMap.set(dimensionValue, 0);
+      }
+      dimensionValueCountMap.set(dimensionValue, dimensionValueCountMap.get(dimensionValue) + 1);
+    }
+  }
+
+  const topDimensionValues =
+      [...dimensionValueCountMap.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map((entry) => entry[0])
+          .slice(0, 2);
+
+  for (const datum of geoJsonData) {
+    // Create a Potree PointVolume object to pass information to the Potree
+    // shader with. PointVolume is a custom type modeled after SphereVolume,
+    // but with unneeded features removed for improved performance.
+    const volume = new Potree.PointVolume();
+
+    if (dimension !== null && datum.record) {
       // Mark the category of this behavioral point as the segment index
       // corresponding to its dimension value.
-      volume.category = dimensionValueToSegmentIndexMap.get(dimensionValue);
+      const dimensionValue = datum.record[dimension];
+
+      if (dimensionValueToSegmentIndexMap.size === 2) {
+        volume.category = dimensionValueToSegmentIndexMap.get(dimensionValue);
+      } else {
+        const category = topDimensionValues.indexOf(dimensionValue);
+        // If this datum is not in the top 2, do not add.
+        if (category === -1) {
+          continue;
+        }
+        volume.category = category;
+      }
     }
 
     const {center} = datum;
@@ -151,7 +183,11 @@ function drawClippingSpheres(
 
   // Update the legend to reflect the dimension and dimension values observed in
   // the data.
-  drawLegend(dimension, [...dimensionValueToSegmentIndexMap.keys()]);
+  const keys =
+      dimensionValueToSegmentIndexMap.size === 2
+          ? [...dimensionValueToSegmentIndexMap.keys()]
+          : topDimensionValues;
+  drawLegend(dimension, keys);
 }
 
 /**
@@ -217,7 +253,7 @@ window.renderNoDimension = () => {
   renderDimension(null);
 };
 
-
+document.querySelector('.selector-dimension').value = '16';
 
 document.querySelector('.selector-dimension')
     .addEventListener('change', (e) => {
