@@ -1,8 +1,18 @@
+.control {
+  margin-top: 32px;
+  width: 256px;
+}
+
+.control input[type="range"] {
+  width: 256px;
+}
+
 .controls {
   align-items: center;
   background: #111;
   color: #fff;
   display: flex;
+  font-size: 18px;
   flex-direction: column;
   height: 100%;
   padding-top: 32px;
@@ -11,12 +21,10 @@
 }
 
 .select-header {
-  width: 256px;
-  text-align: left;
-  font-size: 14px;
   padding: 8px 0;
+  text-align: left;
+  width: 256px;
 }
-
 
 select {
   appearance: none;
@@ -25,6 +33,7 @@ select {
   color: #fff;
   cursor: pointer;
   flex: 1;
+  font-size: 18px;
   outline: 0;
   padding: 0 8px;
 }

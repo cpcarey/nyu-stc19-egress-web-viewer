@@ -131,7 +131,7 @@ body {
   width: 256px;
 }
 
-.label-axis-x-bottom > .label-dimension {
+.label-axis-x-bottom > .label-attribute {
   background: #000;
   display: inline-block;
   max-width: 160px;
@@ -156,11 +156,11 @@ body {
   width: 128px;
 }
 
-.label-dimension-value-1 {
+.label-attribute-value-1 {
   color: rgb(255, 127, 0);
 }
 
-.label-dimension-value-2 {
+.label-attribute-value-2 {
   color: rgb(0, 127, 255);
 }
 
