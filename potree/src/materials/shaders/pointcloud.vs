@@ -43,6 +43,9 @@ uniform float uOrthoHeight;
 
 #define CLIPMETHOD_INSIDE_ANY 0
 #define CLIPMETHOD_INSIDE_ALL 1
+#
+uniform float uDensityKernelRadius;
+uniform float uDensityKernelMax;
 
 uniform int clipTask;
 uniform int clipMethod;
@@ -860,19 +863,17 @@ void doClipping(){
   }
 }
 
-float threshold = 0.75;
-
 float getAccumulation(mat4 clipSphere, vec4 mvPosition) {
   vec4 sphereLocal = clipSphere * mvPosition;
 
   // Terminate early if possible.
-  if (sphereLocal.x > threshold || sphereLocal.y > threshold) {
+  if (sphereLocal.x > uDensityKernelRadius || sphereLocal.y > uDensityKernelRadius) {
     return 0.0;
   }
 
   float distance = length(sphereLocal.xyz);
 
-  return max(threshold - distance, 0.0);
+  return max(uDensityKernelRadius - distance, 0.0);
 }
 
 vec3 getColorFilter(float accumulation, vec3 colorMax, float intensity) {
@@ -975,12 +976,13 @@ void main() {
     }
     #endif
 
-    float acc_max = 1.0;
+    float acc_max = uDensityKernelMax;
     float intensity = 1.0;
 
     #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
     if (acc > 0.0) {
-      float acc_mix = min(1.0, acc / acc_max);
+      float acc_total = min(acc, acc_max) + min(acc, acc_max);
+      float acc_mix = acc_total / 2.0 * acc;
       vColor += (ACC_COLOR_MAX_1 - vColor) * acc_mix;
     }
     #endif

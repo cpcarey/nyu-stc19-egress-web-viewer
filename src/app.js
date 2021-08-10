@@ -269,6 +269,24 @@ document.querySelector('.selector-dimension')
       }
     });
 
+window.setDensityKernelRadius = function(radius) {
+  viewer.pRenderer.densityKernelRadius = radius;
+}
+
+const rangeKdr = document.getElementById('range-kdr');
+rangeKdr.addEventListener('input', (e) => {
+  viewer.pRenderer.densityKernelRadius = parseInt(e.target.value) / 100;
+});
+
+window.setDensityKernelMax = function(max) {
+  viewer.pRenderer.densityKernelMax = max;
+}
+
+const rangeKdm = document.getElementById('range-kdm');
+rangeKdm.addEventListener('input', (e) => {
+  viewer.pRenderer.densityKernelMax = parseInt(e.target.value) / 100;
+});
+
 const button = document.getElementById('reset_button');
 button.onclick = function() {
   console.log('Reset dimension');

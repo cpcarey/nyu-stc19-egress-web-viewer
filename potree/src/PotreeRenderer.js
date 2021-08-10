@@ -562,6 +562,8 @@ export class Renderer {
 
     this.toggle = 0;
     this.config = config || new RendererConfig();
+    this.densityKernelRadius = 0.0;
+    this.densityKernelMax = 1.0;
   }
 
   deleteBuffer(geometry) {
@@ -1342,6 +1344,9 @@ export class Renderer {
         }
       }
 
+
+      shader.setUniform1f("uDensityKernelRadius", this.densityKernelRadius);
+      shader.setUniform1f("uDensityKernelMax", this.densityKernelMax);
 
       shader.setUniform1f("size", material.size);
       shader.setUniform1f("maxSize", material.uniforms.maxSize.value);
