@@ -7,7 +7,7 @@ import {DataStore} from './data_store/data_store.js';
 import * as constants from './util/constants.js';
 import * as drawer from './util/drawer.js';
 import * as util from './util/util.js';
-import {Dimension, DIMENSION_NAMES} from './util/dimension.js';
+import {Attribute, ATTRIBUTE_NAMES} from './util/attribute.js';
 
 const dataStore = new DataStore();
 let viewer;
@@ -82,7 +82,7 @@ function renderPotreeVisualization(geoJsonData) {
     }
 
     // Perform heatmap and elevation shading.
-    drawClippingSpheres(viewer, geoJsonData, Dimension.GENDER);
+    drawClippingSpheres(viewer, geoJsonData, Attribute.GENDER);
     drawer.shadeEnvironment(e.pointcloud);
   });
 };
@@ -92,55 +92,55 @@ function renderPotreeVisualization(geoJsonData) {
  * @param {!Array<!GeoJsonDatum>} geoJsonData The data array of GeoJSON
  *     behavioral point polygon features and their corresponding DETER CSV
  *     records.
- * @param {?Dimension=} The Dimension with which to segment the GeoJSON data by,
+ * @param {?Attribute=} The Attribute with which to segment the GeoJSON data by,
  *     formally the attribute column index in the DETER CSV data,
- *     e.g. Dimension.GENDER
+ *     e.g. Attribute.GENDER
  * @param {number=} The radius of the Potree clipping sphere to apply to each
  *     GeoJSON behavioral point for heatmap accumulation.
  */
 function drawClippingSpheres(
-    viewer, geoJsonData, dimension=null,
+    viewer, geoJsonData, attribute=null,
     radius=constants.CLIPPING_SPHERE_RADIUS) {
 
   /**
-   * A map between the observed dimension value and its assigned segment index,
+   * A map between the observed attribute value and its assigned segment index,
    * e.g. {"Female": 0, "Male": 1}.
    * @type {!Map<!(string|number|null), number>}
    */
-  const dimensionValueToSegmentIndexMap = new Map();
-  const dimensionValueCountMap = new Map();
+  const attributeValueToSegmentIndexMap = new Map();
+  const attributeValueCountMap = new Map();
 
   // Create a Potree clipping sphere for each behavorial point.
   for (const datum of geoJsonData) {
-    if (dimension !== null && datum.record) {
-      // Extract the dimension value from the geoJsonDatum's record based on the
-      // attribute column index of the given dimension by which to segment
+    if (attribute !== null && datum.record) {
+      // Extract the attribute value from the geoJsonDatum's record based on the
+      // attribute column index of the given attribute by which to segment
       // data, e.g. "Female", "Male".
-      const dimensionValue = datum.record[dimension];
+      const attributeValue = datum.record[attribute];
 
       // Ignore N/A values for now.
-      if (dimensionValue == 'NA') {
+      if (attributeValue == 'NA') {
         continue;
       }
 
-      // Add the dimension value to the segment index map if it has not yet
+      // Add the attribute value to the segment index map if it has not yet
       // been observed and assign it the next unused segment index, which is
       // determined by the size of the map, e.g. if "Female" is observed first,
       // assign "Female": 0; then if "Male" is observed assign "Male": 1.
-      if (!dimensionValueToSegmentIndexMap.has(dimensionValue)) {
-        dimensionValueToSegmentIndexMap.set(
-            dimensionValue, dimensionValueToSegmentIndexMap.size);
+      if (!attributeValueToSegmentIndexMap.has(attributeValue)) {
+        attributeValueToSegmentIndexMap.set(
+            attributeValue, attributeValueToSegmentIndexMap.size);
       }
 
-      if (!dimensionValueCountMap.has(dimensionValue)) {
-        dimensionValueCountMap.set(dimensionValue, 0);
+      if (!attributeValueCountMap.has(attributeValue)) {
+        attributeValueCountMap.set(attributeValue, 0);
       }
-      dimensionValueCountMap.set(dimensionValue, dimensionValueCountMap.get(dimensionValue) + 1);
+      attributeValueCountMap.set(attributeValue, attributeValueCountMap.get(attributeValue) + 1);
     }
   }
 
-  const topDimensionValues =
-      [...dimensionValueCountMap.entries()]
+  const topAttributeValues =
+      [...attributeValueCountMap.entries()]
           .sort((a, b) => b[1] - a[1])
           .map((entry) => entry[0])
           .slice(0, 2);
@@ -151,15 +151,15 @@ function drawClippingSpheres(
     // but with unneeded features removed for improved performance.
     const volume = new Potree.PointVolume();
 
-    if (dimension !== null && datum.record) {
+    if (attribute !== null && datum.record) {
       // Mark the category of this behavioral point as the segment index
-      // corresponding to its dimension value.
-      const dimensionValue = datum.record[dimension];
+      // corresponding to its attribute value.
+      const attributeValue = datum.record[attribute];
 
-      if (dimensionValueToSegmentIndexMap.size === 2) {
-        volume.category = dimensionValueToSegmentIndexMap.get(dimensionValue);
+      if (attributeValueToSegmentIndexMap.size === 2) {
+        volume.category = attributeValueToSegmentIndexMap.get(attributeValue);
       } else {
-        const category = topDimensionValues.indexOf(dimensionValue);
+        const category = topAttributeValues.indexOf(attributeValue);
         // If this datum is not in the top 2, do not add.
         if (category === -1) {
           continue;
@@ -181,38 +181,38 @@ function drawClippingSpheres(
     viewer.scene.addHeatPoint(volume);
   }
 
-  // Update the legend to reflect the dimension and dimension values observed in
+  // Update the legend to reflect the attribute and attribute values observed in
   // the data.
   const keys =
-      dimensionValueToSegmentIndexMap.size === 2
-          ? [...dimensionValueToSegmentIndexMap.keys()]
-          : topDimensionValues;
-  drawLegend(dimension, keys);
+      attributeValueToSegmentIndexMap.size === 2
+          ? [...attributeValueToSegmentIndexMap.keys()]
+          : topAttributeValues;
+  drawLegend(attribute, keys);
 }
 
 /**
- * @param {?Dimension} dimension The Dimension by which data were segmented,
- *     e.g. Dimension.GENDER
- * @param {!Array<(string|number|null)>} dimensionValues The dimension values
+ * @param {?Attribute} attribute The Attribute by which data were segmented,
+ *     e.g. Attribute.GENDER
+ * @param {!Array<(string|number|null)>} attributeValues The attribute values
  *     indexed by the segment index for which they corresponding to,
  *     e.g. ["Female", "Male"]
  */
-function drawLegend(dimension, dimensionValues) {
-  // Show/hide color scale based on whether a dimension is provided.
+function drawLegend(attribute, attributeValues) {
+  // Show/hide color scale based on whether a attribute is provided.
   const colorScaleEl = document.querySelector('.color-scale-container');
-  colorScaleEl.style.visibility = (dimension === null) ? 'hidden' : 'visible';
+  colorScaleEl.style.visibility = (attribute === null) ? 'hidden' : 'visible';
 
   // Replace the inner HTML content of the corresponding legend HTML elements
   // the values and display names extracted from the data.
-  const labelDimensionValue1 =
-      document.querySelector('.label-dimension-value-1');
-  const labelDimensionValue2 =
-      document.querySelector('.label-dimension-value-2');
-  const labelDimension =
-      document.querySelector('.label-dimension');
-  labelDimensionValue1.innerHTML = dimensionValues[0];
-  labelDimensionValue2.innerHTML = dimensionValues[1];
-  labelDimension.innerHTML = DIMENSION_NAMES.get(dimension);
+  const labelAttributeValue1 =
+      document.querySelector('.label-attribute-value-1');
+  const labelAttributeValue2 =
+      document.querySelector('.label-attribute-value-2');
+  const labelAttribute =
+      document.querySelector('.label-attribute');
+  labelAttributeValue1.innerHTML = attributeValues[0];
+  labelAttributeValue2.innerHTML = attributeValues[1];
+  labelAttribute.innerHTML = ATTRIBUTE_NAMES.get(attribute);
 }
 
 /**
@@ -242,35 +242,35 @@ document.addEventListener('DOMContentLoaded', run);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/** Renders the Potree visualization with the given dimension. */
-window.renderDimension = async (dimension) => {
+/** Renders the Potree visualization with the given attribute. */
+window.renderAttribute = async (attribute) => {
   const geoJsonData = await dataStore.getGeoJsonData();
   resetPotreeViewer(geoJsonData);
-  drawClippingSpheres(viewer, geoJsonData, dimension);
+  drawClippingSpheres(viewer, geoJsonData, attribute);
 };
 
-window.renderNoDimension = () => {
-  renderDimension(null);
+window.renderNoAttribute = () => {
+  renderAttribute(null);
 };
 
-document.querySelector('.selector-dimension').value = '16';
+document.querySelector('.selector-attribute').value = '16';
 
-document.querySelector('.selector-dimension')
+document.querySelector('.selector-attribute')
     .addEventListener('change', (e) => {
       const value = parseInt(e.target.value);
-      console.log('Render Dimension: ', e.target.value);
-      if (value === Dimension.NO_DIMENSION) {
-        renderNoDimension();
+      console.log('Render Attribute: ', e.target.value);
+      if (value === Attribute.NO_ATTRIBUTE) {
+        renderNoAttribute();
         console.log('Reinicio ');
       }
-      if (value !== Dimension.NO_DIMENSION) {
-        renderDimension(value);
+      if (value !== Attribute.NO_ATTRIBUTE) {
+        renderAttribute(value);
         console.log('normal ');
       }
     });
 
 const button = document.getElementById('reset_button');
 button.onclick = function() {
-  console.log('Reset dimension');
-  renderNoDimension();
+  console.log('Reset attribute');
+  renderNoAttribute();
 };
