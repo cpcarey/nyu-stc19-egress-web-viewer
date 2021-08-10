@@ -4,6 +4,7 @@ import {LineGeometry} from '../libs/three.js/lines/LineGeometry.js';
 import {LineMaterial} from '../libs/three.js/lines/LineMaterial.js';
 
 import {DataStore} from './data_store/data_store.js';
+import * as controls from './controls/controls.js';
 import * as constants from './util/constants.js';
 import * as drawer from './util/drawer.js';
 import * as util from './util/util.js';
@@ -87,21 +88,7 @@ function renderPotreeVisualization(geoJsonData) {
   });
 };
 
-/**
- * @param {!Potree.Viewer} viewer The Potree viewer
- * @param {!Array<!GeoJsonDatum>} geoJsonData The data array of GeoJSON
- *     behavioral point polygon features and their corresponding DETER CSV
- *     records.
- * @param {?Attribute=} The Attribute with which to segment the GeoJSON data by,
- *     formally the attribute column index in the DETER CSV data,
- *     e.g. Attribute.GENDER
- * @param {number=} The radius of the Potree clipping sphere to apply to each
- *     GeoJSON behavioral point for heatmap accumulation.
- */
-function drawClippingSpheres(
-    viewer, geoJsonData, attribute=null,
-    radius=constants.CLIPPING_SPHERE_RADIUS) {
-
+function getAttributeClasses(attribute, geoJsonData) {
   /**
    * A map between the observed attribute value and its assigned segment index,
    * e.g. {"Female": 0, "Male": 1}.
@@ -110,7 +97,6 @@ function drawClippingSpheres(
   const attributeValueToSegmentIndexMap = new Map();
   const attributeValueCountMap = new Map();
 
-  // Create a Potree clipping sphere for each behavorial point.
   for (const datum of geoJsonData) {
     if (attribute !== null && datum.record) {
       // Extract the attribute value from the geoJsonDatum's record based on the
@@ -135,16 +121,59 @@ function drawClippingSpheres(
       if (!attributeValueCountMap.has(attributeValue)) {
         attributeValueCountMap.set(attributeValue, 0);
       }
-      attributeValueCountMap.set(attributeValue, attributeValueCountMap.get(attributeValue) + 1);
+      attributeValueCountMap.set(
+          attributeValue, attributeValueCountMap.get(attributeValue) + 1);
     }
   }
 
-  const topAttributeValues =
+  return {
+    attributeValueToSegmentIndexMap,
+    attributeValueCountMap,
+  };
+}
+
+/**
+ * @param {!Potree.Viewer} viewer The Potree viewer
+ * @param {!Array<!GeoJsonDatum>} geoJsonData The data array of GeoJSON
+ *     behavioral point polygon features and their corresponding DETER CSV
+ *     records.
+ * @param {?Attribute=} The Attribute with which to segment the GeoJSON data by,
+ *     formally the attribute column index in the DETER CSV data,
+ *     e.g. Attribute.GENDER
+ * @param {number=} The radius of the Potree clipping sphere to apply to each
+ *     GeoJSON behavioral point for heatmap accumulation.
+ */
+function drawClippingSpheres(
+    viewer, geoJsonData, attribute=null,
+    radius=constants.CLIPPING_SPHERE_RADIUS) {
+
+  const {attributeValueToSegmentIndexMap, attributeValueCountMap} =
+      getAttributeClasses(attribute, geoJsonData);
+
+  const sortedAttributeValues =
       [...attributeValueCountMap.entries()]
           .sort((a, b) => b[1] - a[1])
           .map((entry) => entry[0])
-          .slice(0, 2);
 
+  controls.updateAttributeClasses(sortedAttributeValues, (attributeClasses) => {
+    resetPotreeViewer();
+    updateClippingSpheres(
+        viewer, geoJsonData, attribute, attributeValueToSegmentIndexMap,
+        attributeValueCountMap, attributeClasses, radius);
+  });
+
+  const topAttributeValues = sortedAttributeValues.slice(0, 2);
+
+  updateClippingSpheres(
+      viewer, geoJsonData, attribute, attributeValueToSegmentIndexMap,
+      attributeValueCountMap, topAttributeValues, radius);
+}
+
+function updateClippingSpheres(
+    viewer, geoJsonData, attribute, attributeValueToSegmentIndexMap,
+    attributeValueCountMap, selectedAttributeValues, radius) {
+
+  // Create a Potree clipping sphere for each behavorial point.
   for (const datum of geoJsonData) {
     // Create a Potree PointVolume object to pass information to the Potree
     // shader with. PointVolume is a custom type modeled after SphereVolume,
@@ -156,16 +185,12 @@ function drawClippingSpheres(
       // corresponding to its attribute value.
       const attributeValue = datum.record[attribute];
 
-      if (attributeValueToSegmentIndexMap.size === 2) {
-        volume.category = attributeValueToSegmentIndexMap.get(attributeValue);
-      } else {
-        const category = topAttributeValues.indexOf(attributeValue);
-        // If this datum is not in the top 2, do not add.
-        if (category === -1) {
-          continue;
-        }
-        volume.category = category;
+      const category = selectedAttributeValues.indexOf(attributeValue);
+      // If this datum is not in the top 2, do not add.
+      if (category === -1) {
+        continue;
       }
+      volume.category = category;
     }
 
     const {center} = datum;
@@ -183,10 +208,7 @@ function drawClippingSpheres(
 
   // Update the legend to reflect the attribute and attribute values observed in
   // the data.
-  const keys =
-      attributeValueToSegmentIndexMap.size === 2
-          ? [...attributeValueToSegmentIndexMap.keys()]
-          : topAttributeValues;
+  const keys = selectedAttributeValues;
   drawLegend(attribute, keys);
 }
 
@@ -269,6 +291,16 @@ document.querySelector('.selector-attribute')
       }
     });
 
+document.querySelector('.select-attribute-class-1')
+    .addEventListener('change', (e) => {
+      controls.handleSelectAttributeClassChange(e, 0);
+    });
+
+document.querySelector('.select-attribute-class-2')
+    .addEventListener('change', (e) => {
+      controls.handleSelectAttributeClassChange(e, 1);
+    });
+
 window.setDensityKernelRadius = function(radius) {
   viewer.pRenderer.densityKernelRadius = radius;
 }
@@ -286,9 +318,3 @@ const rangeKdm = document.getElementById('range-kdm');
 rangeKdm.addEventListener('input', (e) => {
   viewer.pRenderer.densityKernelMax = parseInt(e.target.value) / 100;
 });
-
-const button = document.getElementById('reset_button');
-button.onclick = function() {
-  console.log('Reset attribute');
-  renderNoAttribute();
-};

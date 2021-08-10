@@ -38,21 +38,37 @@
 
   <div class="control-panel">
     <div class="controls">
-      <div class="select-header">Attribute</div>
-      <div class="select-container">
-        <select class="selector-attribute">
+      <div class="control">
+        <div class="select-header">Attribute</div>
+        <div class="select-container">
+          <select class="selector-attribute">
+            <option value="112">NO_ATTRIBUTE</option>
+            <option value="7">DAY_TYPE</option>
+            <option value="19">FINAL_DESTINATION_CODED</option>
+            <option value="28">FIRST_TOUCH_OBJ_CODED</option>
+            <option value="16">GENDER</option>
+            <option value="35">MECH_TRANS</option>
+            <option value="34">RE_MEDICAL</option>
+            <option value="14">TIME_TYPE</option>
+            <option value="24">TOUCH_BINARY</option>
+          </select>
+        </div>
+      </div>
 
-          <option value="112">NO_ATTRIBUTE</option>
-          <option value="7">DAY_TYPE</option>
-          <option value="19">FINAL_DESTINATION_CODED</option>
-          <option value="28">FIRST_TOUCH_OBJ_CODED</option>
-          <option value="16">GENDER</option>
-          <option value="35">MECH_TRANS</option>
-          <option value="34">RE_MEDICAL</option>
-          <option value="14">TIME_TYPE</option>
-          <option value="24">TOUCH_BINARY</option>
-        </select>
+      <div class="control">
+        <div class="select-header">Attribute Class 1</div>
+        <div class="select-container">
+          <select class="select-attribute-class-1">
+          </select>
+        </div>
+      </div>
 
+      <div class="control">
+        <div class="select-header">Attribute Class 2</div>
+        <div class="select-container">
+          <select class="select-attribute-class-2">
+          </select>
+        </div>
       </div>
 
       <div class="control">
@@ -99,6 +115,7 @@
   <script type="module" src="./data_store/csv_data_fetcher.js"></script>
   <script type="module" src="./data_store/geo_json_data_fetcher.js"></script>
   <script type="module" src="./data_store/data_store.js"></script>
+  <script type="module" src="./controls/controls.js"></script>
   <script type="module" src="./app.js"></script>
 
   </body>
