@@ -48,6 +48,9 @@ export class Viewer extends EventDispatcher{
     this.onVrListeners = [];
     this.rendererConfig = args.rendererConfig;
 
+    this.densityKernelRadius = 0.75;
+    this.densityKernelMax = 0.75;
+
     this.messages = [];
     this.elMessages = $(`
     <div id="message_listing" 
@@ -217,6 +220,8 @@ export class Viewer extends EventDispatcher{
     }
     
     this.pRenderer = new Renderer(this.renderer, this.rendererConfig);
+    this.pRenderer.densityKernelRadius = this.densityKernelRadius;
+    this.pRenderer.densityKernelMax = this.densityKernelMax;
     
     {
       let near = 2.5;

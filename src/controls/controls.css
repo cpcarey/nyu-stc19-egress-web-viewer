@@ -1,22 +1,29 @@
+.control {
+  margin-top: 32px;
+  width: 320px;
+}
+
+.control input[type="range"] {
+  width: 320px;
+}
+
 .controls {
   align-items: center;
   background: #111;
   color: #fff;
   display: flex;
+  font-size: 18px;
   flex-direction: column;
   height: 100%;
-  padding-top: 32px;
   right: 0;
   width: 100%;
 }
 
 .select-header {
-  width: 256px;
-  text-align: left;
-  font-size: 14px;
   padding: 8px 0;
+  text-align: left;
+  width: 320px;
 }
-
 
 select {
   appearance: none;
@@ -25,6 +32,7 @@ select {
   color: #fff;
   cursor: pointer;
   flex: 1;
+  font-size: 18px;
   outline: 0;
   padding: 0 8px;
 }
@@ -36,7 +44,7 @@ select {
   line-height: 2;
   overflow: hidden;
   position: relative;
-  width: 256px;
+  width: 320px;
 }
 
 .select-container::after {
