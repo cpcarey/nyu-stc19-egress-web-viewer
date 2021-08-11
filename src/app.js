@@ -25,7 +25,7 @@ function initPotreeViewer() {
   // Set Potree recommended defaults.
   viewer.setEDLEnabled(true);
   viewer.setFOV(60);
-  viewer.setPointBudget(2_000_000);
+  viewer.setPointBudget(10_000_000);
 }
 
 /**

@@ -1,10 +1,10 @@
 .control {
   margin-top: 32px;
-  width: 256px;
+  width: 320px;
 }
 
 .control input[type="range"] {
-  width: 256px;
+  width: 320px;
 }
 
 .controls {
@@ -15,7 +15,6 @@
   font-size: 18px;
   flex-direction: column;
   height: 100%;
-  padding-top: 32px;
   right: 0;
   width: 100%;
 }
@@ -23,7 +22,7 @@
 .select-header {
   padding: 8px 0;
   text-align: left;
-  width: 256px;
+  width: 320px;
 }
 
 select {
@@ -45,7 +44,7 @@ select {
   line-height: 2;
   overflow: hidden;
   position: relative;
-  width: 256px;
+  width: 320px;
 }
 
 .select-container::after {
