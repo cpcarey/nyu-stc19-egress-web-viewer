@@ -871,6 +871,10 @@ float getAccumulation(mat4 clipSphere, vec4 mvPosition) {
     return 0.0;
   }
 
+  if (sphereLocal.x * sphereLocal.x + sphereLocal.y * sphereLocal.y > uDensityKernelRadius * uDensityKernelRadius) {
+    return 0.0;
+  }
+
   float distance = length(sphereLocal.xyz);
 
   return max(uDensityKernelRadius - distance, 0.0);
@@ -942,37 +946,24 @@ void main() {
     float acc1 = 0.0;
     float acc2 = 0.0;
 
-    float n = 0.0;
-    float n1 = 0.0;
-    float n2 = 0.0;
-
     #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
     for (int i = 0; i < num_clipspheres; i++) {
       float acc_i = getAccumulation(uClipSpheres[i], mvPosition);
-      if (acc_i > 0.0) {
-        acc += acc_i;
-        n += 1.0;
-      }
+      acc += acc_i;
     }
     #endif
 
     #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
     for (int i = 0; i < num_clipspheres_segment1; i++) {
       float acc_i = getAccumulation(uClipSpheresSegment1[i], mvPosition);
-      if (acc_i > 0.0) {
-        acc1 += acc_i;
-        n1 += 1.0;
-      }
+      acc1 += acc_i;
     }
     #endif
 
     #if defined(num_clipspheres_segment2) && num_clipspheres_segment2 > 0
     for (int i = 0; i < num_clipspheres_segment2; i++) {
       float acc_i = getAccumulation(uClipSpheresSegment2[i], mvPosition);
-      if (acc_i > 0.0) {
-        acc2 += acc_i;
-        n2 += 1.0;
-      }
+      acc2 += acc_i;
     }
     #endif
 
@@ -981,16 +972,13 @@ void main() {
 
     #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
     if (acc > 0.0) {
-      float acc_total = min(acc, acc_max) + min(acc, acc_max);
-      float acc_mix = acc_total / 2.0 * acc;
-      vColor += (ACC_COLOR_MAX_1 - vColor) * acc_mix;
+      vColor += (ACC_COLOR_MAX_1 - vColor) * (acc / acc_max);
     }
     #endif
 
     #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
     if (acc1 > 0.0 || acc2 > 0.0) {
-      float acc_total = min(acc1, acc_max) + min(acc2, acc_max);
-      float acc_mix = acc_total / 2.0 * acc_max;
+      float acc_mix = min(acc1 + acc2, acc_max) / acc_max;
 
       vec3 majorityClassColor = vec3(0.0, 0.0, 0.0);
       vec3 medianColor = vColor + (ACC_COLOR_MAX_MID - vColor) * acc_mix;
