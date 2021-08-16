@@ -2,6 +2,8 @@
 
 A viewer for 3D visualization of NYU-collected data on egress behavior from NYC COVID-19 exposed health facilities.
 
+![Screenshot of Client Application](./docs/screenshot.png)
+
 # Development
 
 ## Preparing
