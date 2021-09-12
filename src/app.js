@@ -13,9 +13,45 @@ import {Attribute, ATTRIBUTE_NAMES} from './util/attribute.js';
 const dataStore = new DataStore();
 let viewer;
 
-/**
- * Initializes the Potree Viewer with default settings.
- */
+/** Attaches event listeners to UI controls. */
+function initEventListeners() {
+  // Event listener for Attribute dropdown.
+  document.querySelector('.selector-attribute')
+      .addEventListener('change', (e) => {
+        const value = parseInt(e.target.value);
+        if (value === Attribute.NO_ATTRIBUTE) {
+          renderAttribute(null);
+        } else {
+          renderAttribute(value);
+        }
+      });
+
+  // Event listener for Attribute Class 1 dropdown.
+  document.querySelector('.select-attribute-class-1')
+      .addEventListener('change', (e) => {
+        controls.handleSelectAttributeClassChange(e, 0);
+      });
+
+  // Event listener for Attribute Class 2 dropdown.
+  document.querySelector('.select-attribute-class-2')
+      .addEventListener('change', (e) => {
+        controls.handleSelectAttributeClassChange(e, 1);
+      });
+
+  // Event listener for Kernel Density Radius slider.
+  document.getElementById('range-kdr')
+      .addEventListener('input', (e) => {
+        viewer.pRenderer.densityKernelRadius = parseInt(e.target.value) / 100;
+      });
+
+  // Event listener for Kernel Density Maximum slider.
+  document.getElementById('range-kdm')
+      .addEventListener('input', (e) => {
+        viewer.pRenderer.densityKernelMax = parseInt(e.target.value) / 100;
+      });
+}
+
+/** Initializes the Potree Viewer with default settings. */
 function initPotreeViewer() {
   // Initialize Potree Viewer by providing it with the page element to attach
   // to.
@@ -238,6 +274,16 @@ function drawLegend(attribute, attributeValues) {
 }
 
 /**
+ * Renders the Potree visualization with the given attribute.
+ * @param {!Attribute} attribute
+ */
+async function renderAttribute(attribute) {
+  const geoJsonData = await dataStore.getGeoJsonData();
+  resetPotreeViewer(geoJsonData);
+  drawClippingSpheres(viewer, geoJsonData, attribute);
+};
+
+/**
  * Resets the Potree viewer by removing all of the Potree.HeatPoint volumes
  * which might have been added previously.
  */
@@ -247,10 +293,9 @@ function resetPotreeViewer() {
   }
 }
 
-/**
- * Initializes and starts the visualization application.
- */
+/** Initializes and starts the visualization application. */
 async function run() {
+  initEventListeners();
   initPotreeViewer();
 
   // Extract and process GeoJSON behavioral data necessary for visualization.
@@ -261,60 +306,3 @@ async function run() {
 }
 
 document.addEventListener('DOMContentLoaded', run);
-
-////////////////////////////////////////////////////////////////////////////////
-
-/** Renders the Potree visualization with the given attribute. */
-window.renderAttribute = async (attribute) => {
-  const geoJsonData = await dataStore.getGeoJsonData();
-  resetPotreeViewer(geoJsonData);
-  drawClippingSpheres(viewer, geoJsonData, attribute);
-};
-
-window.renderNoAttribute = () => {
-  renderAttribute(null);
-};
-
-document.querySelector('.selector-attribute').value = '16';
-
-document.querySelector('.selector-attribute')
-    .addEventListener('change', (e) => {
-      const value = parseInt(e.target.value);
-      console.log('Render Attribute: ', e.target.value);
-      if (value === Attribute.NO_ATTRIBUTE) {
-        renderNoAttribute();
-        console.log('Reinicio ');
-      }
-      if (value !== Attribute.NO_ATTRIBUTE) {
-        renderAttribute(value);
-        console.log('normal ');
-      }
-    });
-
-document.querySelector('.select-attribute-class-1')
-    .addEventListener('change', (e) => {
-      controls.handleSelectAttributeClassChange(e, 0);
-    });
-
-document.querySelector('.select-attribute-class-2')
-    .addEventListener('change', (e) => {
-      controls.handleSelectAttributeClassChange(e, 1);
-    });
-
-window.setDensityKernelRadius = function(radius) {
-  viewer.pRenderer.densityKernelRadius = radius;
-}
-
-const rangeKdr = document.getElementById('range-kdr');
-rangeKdr.addEventListener('input', (e) => {
-  viewer.pRenderer.densityKernelRadius = parseInt(e.target.value) / 100;
-});
-
-window.setDensityKernelMax = function(max) {
-  viewer.pRenderer.densityKernelMax = max;
-}
-
-const rangeKdm = document.getElementById('range-kdm');
-rangeKdm.addEventListener('input', (e) => {
-  viewer.pRenderer.densityKernelMax = parseInt(e.target.value) / 100;
-});
