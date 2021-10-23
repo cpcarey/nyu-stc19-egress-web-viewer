@@ -1,4 +1,5 @@
 import * as THREE from '../../libs/three.js/build/three.module.js';
+import * as config from '../config.js';
 
 /**
  * Draws a 3D bar chart visualization representing the number of overlaps at the
@@ -41,6 +42,34 @@ export function drawBarChart(viewer, centers, radius = 10) {
     });
 
     const mesh = new THREE.Mesh(cylinder, cylinderMaterial);
+    viewer.scene.scene.add(mesh);
+  }
+}
+
+/**
+ * Adds ThreeJS cylinders to the scene of the given viewer at the center
+ * locations in the given GeoJSON data.
+ * @param {!Potree.Viewer} viewer
+ * @param {!Array<!GeoJsonDatum>} geoJsonData
+ * @param {number]} radius
+ */
+export function drawCylinderPlot(viewer, geoJsonData, radius = 10) {
+  const color = new THREE.Color(0.0, 1.0, 0.0);
+  const height = 4;
+  const centers = geoJsonData.map((d) => d.center);
+
+  // Create ThreeJS cylinders at every center point in GeoJsonData and render.
+  for (const center of centers) {
+    const cylinderGeometry =
+        new THREE.CylinderGeometry(radius, radius, height, 16);
+    cylinderGeometry.rotateX(0.5 * Math.PI);
+    cylinderGeometry.translate(center[0], center[1], config.GROUND_Z);
+
+    const cylinderMaterial = new THREE.MeshBasicMaterial({
+      color: color.clone(),
+    });
+    const mesh = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
+
     viewer.scene.scene.add(mesh);
   }
 }
