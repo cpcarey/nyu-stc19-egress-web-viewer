@@ -1,4 +1,4 @@
-import * as constants from './constants.js';
+import * as config from '../config.js';
 
 export function convertLatLonToCoordSpace(
     xMin, xMax, yMin, yMax, lonMin, lonMax, latMin, latMax, lon, lat) {
@@ -20,10 +20,10 @@ export function convertLatLonsToCoordSpace(
       coordSpaceMax.x,
       coordSpaceMin.y,
       coordSpaceMax.y,
-      constants.LON_MIN,
-      constants.LON_MAX,
-      constants.LAT_MIN,
-      constants.LAT_MAX,
+      config.LON_MIN,
+      config.LON_MAX,
+      config.LAT_MIN,
+      config.LAT_MAX,
       parseFloat(lon),
       parseFloat(lat),
     );

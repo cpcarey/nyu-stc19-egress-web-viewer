@@ -4,8 +4,8 @@ import {LineGeometry} from '../libs/three.js/lines/LineGeometry.js';
 import {LineMaterial} from '../libs/three.js/lines/LineMaterial.js';
 
 import {DataStore} from './data_store/data_store.js';
+import * as config from './config.js';
 import * as controls from './controls/controls.js';
-import * as constants from './util/constants.js';
 import * as drawer from './util/drawer.js';
 import * as util from './util/util.js';
 import {Attribute, ATTRIBUTE_NAMES} from './util/attribute.js';
@@ -36,7 +36,7 @@ function initPotreeViewer() {
  *   records.
  */
 function renderPotreeVisualization(geoJsonData) {
-  Potree.loadPointCloud(constants.URL_CLOUD, constants.CODE, (e) => {
+  Potree.loadPointCloud(config.URL_CLOUD, config.CODE, (e) => {
     viewer.scene.addPointCloud(e.pointcloud);
     e.pointcloud.position.z = 0;
 
@@ -59,14 +59,14 @@ function renderPotreeVisualization(geoJsonData) {
     // Position and point the camera.
     const cameraPosition =
         new THREE.Vector3(
-            q1.x + constants.CAMERA_POSITION_OFFSET_X,
-            q1.y + constants.CAMERA_POSITION_OFFSET_Y,
-            constants.CAMERA_POSITION_Z);
+            q1.x + config.CAMERA_POSITION_OFFSET_X,
+            q1.y + config.CAMERA_POSITION_OFFSET_Y,
+            config.CAMERA_POSITION_Z);
     const cameraLookAt =
         new THREE.Vector3(
-            q1.x + constants.CAMERA_LOOK_AT_OFFSET_X,
-            q1.y + constants.CAMERA_LOOK_AT_OFFSET_Y,
-            constants.CAMERA_LOOK_AT_Z);
+            q1.x + config.CAMERA_LOOK_AT_OFFSET_X,
+            q1.y + config.CAMERA_LOOK_AT_OFFSET_Y,
+            config.CAMERA_LOOK_AT_Z);
     viewer.scene.view.position.set(
         cameraPosition.x,
         cameraPosition.y,
@@ -145,7 +145,7 @@ function getAttributeClasses(attribute, geoJsonData) {
  */
 function drawClippingSpheres(
     viewer, geoJsonData, attribute=null,
-    radius=constants.CLIPPING_SPHERE_RADIUS) {
+    radius=config.CLIPPING_SPHERE_RADIUS) {
 
   const {attributeValueToSegmentIndexMap, attributeValueCountMap} =
       getAttributeClasses(attribute, geoJsonData);
@@ -197,7 +197,7 @@ function updateClippingSpheres(
     // The constant GROUND_Z_VALUE is set as the approximate constant z-value of
     // ground level in the observed region.
     volume.scale.set(radius, radius, radius);
-    volume.position.set(center[0], center[1], constants.GROUND_Z);
+    volume.position.set(center[0], center[1], config.GROUND_Z);
     volume.visible = false;
 
     // Potree was modified to treat these clipping spheres separately for
@@ -254,7 +254,10 @@ async function run() {
   initPotreeViewer();
 
   // Extract and process GeoJSON behavioral data necessary for visualization.
-  const geoJsonData = await dataStore.getGeoJsonData();
+  const geoJsonData =
+      config.RENDERING_CONFIG.fetchGeoJsonData
+          ? await dataStore.getGeoJsonData()
+          : [];
 
   // Render the Potree visualization with the processed GeoJSON data.
   renderPotreeVisualization(geoJsonData);
