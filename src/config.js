@@ -31,5 +31,9 @@ export const LON_MAX = -73.8527;
 // Configuration for what the application should render.
 export const RENDERING_CONFIG = {
   // Set to true to load GeoJson data.
-  fetchGeoJsonData: false,
+  fetchGeoJsonData: true,
+  // Set to true to render behavioral data as density plots.
+  renderDensityPlot: false,
+  // Set to true to render behavioral data as cylinders.
+  renderCylinderPlot: true,
 };

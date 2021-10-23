@@ -82,8 +82,16 @@ function renderPotreeVisualization(geoJsonData) {
       datum.center = util.getPolygonCenter(datum.blob);
     }
 
-    // Perform heatmap and elevation shading.
-    drawClippingSpheres(viewer, geoJsonData, Attribute.GENDER);
+    // Render density plot.
+    if (config.RENDERING_CONFIG.renderDensityPlot) {
+      drawClippingSpheres(viewer, geoJsonData, Attribute.GENDER);
+    }
+
+    if (config.RENDERING_CONFIG.renderCylinderPlot) {
+      drawer.drawCylinderPlot(viewer, geoJsonData);
+    }
+
+    // Monochromatically shade point cloud points by elevation.
     drawer.shadeEnvironment(e.pointcloud);
   });
 };
