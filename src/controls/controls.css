@@ -1,3 +1,7 @@
+.color-scale-container.hide {
+  visibility: hidden;
+}
+
 .control {
   margin-top: 32px;
   width: 320px;
@@ -17,6 +21,10 @@
   height: 100%;
   right: 0;
   width: 100%;
+}
+
+.controls-multivariate.hide {
+  display: none;
 }
 
 .select-header {

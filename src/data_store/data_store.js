@@ -1,7 +1,7 @@
 import {CsvDataFetcher} from './csv_data_fetcher.js';
 import {GeoJsonDataFetcher} from './geo_json_data_fetcher.js';
 
-import {CSV_DATA_URL, GEO_JSON_DATA_URL} from '../config.js';
+import {CSV_DATA_URL, GEO_JSON_DATA_URL, RENDERING_CONFIG} from '../config.js';
 
 export class DataStore {
   /** @private {{csvData: ?Array<!Object>, geoJsonData: ?Array<!Object>}} */
@@ -27,7 +27,10 @@ export class DataStore {
   async getGeoJsonData() {
     if (this.cache.geoJsonData === null) {
       this.cache.geoJsonData = await this.geoJsonDataFetcher.fetchData();
-      mergeData(await this.getCsvData(), this.cache.geoJsonData);
+
+      if (RENDERING_CONFIG.renderMultivariateDensityPlot) {
+        mergeData(await this.getCsvData(), this.cache.geoJsonData);
+      }
     }
 
     return this.cache.geoJsonData;
