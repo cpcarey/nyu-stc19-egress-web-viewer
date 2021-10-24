@@ -228,6 +228,10 @@ function updateClippingSpheres(
  *     e.g. ["Female", "Male"]
  */
 function drawLegend(attribute, attributeValues) {
+  if (!config.RENDERING_CONFIG.renderMultivariateDensityPlot) {
+    return;
+  }
+
   // Show/hide color scale based on whether a attribute is provided.
   const colorScaleEl = document.querySelector('.color-scale-container');
   colorScaleEl.style.visibility = (attribute === null) ? 'hidden' : 'visible';

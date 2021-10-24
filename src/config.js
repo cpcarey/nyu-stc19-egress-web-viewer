@@ -32,8 +32,10 @@ export const LON_MAX = -73.8527;
 export const RENDERING_CONFIG = {
   // Set to true to load GeoJson data.
   fetchGeoJsonData: true,
-  // Set to true to render behavioral data as density plots.
-  renderDensityPlot: false,
   // Set to true to render behavioral data as cylinders.
   renderCylinderPlot: true,
+  // Set to true to render behavioral data as density plots.
+  renderDensityPlot: false,
+  // Set to true to render multivariate density plots (requires CSV data).
+  renderMultivariateDensityPlot: false,
 };
