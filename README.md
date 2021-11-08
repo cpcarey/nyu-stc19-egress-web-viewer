@@ -37,6 +37,20 @@ This application can segment 2D point data by their associated attributes. Attri
 
 For example, the initial version of this application used the `all_records_dta_09142020.csv` file from the [DETER dataset](https://geo.nyu.edu/catalog/nyu-2451-60075) to join attributes of events (e.g. gender, time-of-day, PPE-presence) to the locations of those events. This CSV file was placed in the `data` directory and its location was used as the value of the `CSV_DATA_URL` field in [`config.js`](https://github.com/cpcarey/nyu-stc19-egress-web-viewer/blob/main/src/config.js).
 
+## Configuring
+
+### Configuring rendering
+
+This application has several modes of rendering that can be configured in [`config.js`](https://github.com/cpcarey/nyu-stc19-egress-web-viewer/blob/main/src/config.js). These different rendering modes can be useful for rendering data when not all data are available:
+
+#### Rendering point cloud data
+
+This application always renders point cloud data. As such, point cloud data must be provided in order for the application to render.
+
+#### Rendering behavioral data
+
+This application renders provided behavioral data by default. It may be useful to disable this rendering mode when behavioral data are not available or when just a rendering of the built environment is desired. Set [`fetchGeoJsonData`](https://github.com/cpcarey/nyu-stc19-egress-web-viewer/blob/7cf9524ec14af01d0f8915fc7ac7275895001496/src/config.js#L34) to `false` in order to render just the point cloud data.
+
 ## Running
 
  * `npm start`
