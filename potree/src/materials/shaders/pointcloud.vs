@@ -53,16 +53,16 @@ uniform int clipMethod;
   uniform mat4 clipBoxes[num_clipboxes];
 #endif
 #
-#if defined(num_clipspheres) && num_clipspheres > 0
-  uniform mat4 uClipSpheres[num_clipspheres];
+#if defined(num_densityspheres) && num_densityspheres > 0
+  uniform mat4 uDensitySpheres[num_densityspheres];
 #endif
 
-#if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
-  uniform mat4 uClipSpheresSegment1[num_clipspheres_segment1];
+#if defined(num_densityspheres_segment1) && num_densityspheres_segment1 > 0
+  uniform mat4 uDensitySpheresSegment1[num_densityspheres_segment1];
 #endif
 
-#if defined(num_clipspheres_segment2) && num_clipspheres_segment2 > 0
-  uniform mat4 uClipSpheresSegment2[num_clipspheres_segment2];
+#if defined(num_densityspheres_segment2) && num_densityspheres_segment2 > 0
+  uniform mat4 uDensitySpheresSegment2[num_densityspheres_segment2];
 #endif
 
 #if defined(num_clippolygons) && num_clippolygons > 0
@@ -863,8 +863,8 @@ void doClipping(){
   }
 }
 
-float getAccumulation(mat4 clipSphere, vec4 mvPosition) {
-  vec4 sphereLocal = clipSphere * mvPosition;
+float getAccumulation(mat4 densitySphere, vec4 mvPosition) {
+  vec4 sphereLocal = densitySphere * mvPosition;
 
   // Terminate early if possible.
   if (sphereLocal.x > uDensityKernelRadius || sphereLocal.y > uDensityKernelRadius) {
@@ -941,28 +941,28 @@ void main() {
   // CLIPPING
   doClipping();
 
-  #if defined(num_clipspheres) && num_clipspheres > 0
+  #if defined(num_densityspheres) && num_densityspheres > 0
     float acc = 0.0;
     float acc1 = 0.0;
     float acc2 = 0.0;
 
-    #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
-    for (int i = 0; i < num_clipspheres; i++) {
-      float acc_i = getAccumulation(uClipSpheres[i], mvPosition);
+    #if !defined(num_densityspheres_segment1) || num_densityspheres_segment1 == 0
+    for (int i = 0; i < num_densityspheres; i++) {
+      float acc_i = getAccumulation(uDensitySpheres[i], mvPosition);
       acc += acc_i;
     }
     #endif
 
-    #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
-    for (int i = 0; i < num_clipspheres_segment1; i++) {
-      float acc_i = getAccumulation(uClipSpheresSegment1[i], mvPosition);
+    #if defined(num_densityspheres_segment1) && num_densityspheres_segment1 > 0
+    for (int i = 0; i < num_densityspheres_segment1; i++) {
+      float acc_i = getAccumulation(uDensitySpheresSegment1[i], mvPosition);
       acc1 += acc_i;
     }
     #endif
 
-    #if defined(num_clipspheres_segment2) && num_clipspheres_segment2 > 0
-    for (int i = 0; i < num_clipspheres_segment2; i++) {
-      float acc_i = getAccumulation(uClipSpheresSegment2[i], mvPosition);
+    #if defined(num_densityspheres_segment2) && num_densityspheres_segment2 > 0
+    for (int i = 0; i < num_densityspheres_segment2; i++) {
+      float acc_i = getAccumulation(uDensitySpheresSegment2[i], mvPosition);
       acc2 += acc_i;
     }
     #endif
@@ -970,13 +970,13 @@ void main() {
     float acc_max = uDensityKernelMax;
     float intensity = 1.0;
 
-    #if !defined(num_clipspheres_segment1) || num_clipspheres_segment1 == 0
+    #if !defined(num_densityspheres_segment1) || num_densityspheres_segment1 == 0
     if (acc > 0.0) {
       vColor += (ACC_COLOR_MAX_1 - vColor) * (acc / acc_max);
     }
     #endif
 
-    #if defined(num_clipspheres_segment1) && num_clipspheres_segment1 > 0
+    #if defined(num_densityspheres_segment1) && num_densityspheres_segment1 > 0
     if (acc1 > 0.0 || acc2 > 0.0) {
       float acc_mix = min(acc1 + acc2, acc_max) / acc_max;
 

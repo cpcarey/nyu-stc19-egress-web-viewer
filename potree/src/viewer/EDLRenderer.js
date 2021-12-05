@@ -253,7 +253,7 @@ export class EDLRenderer{
       
       if(lights.length > 0){
         viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtEDL, {
-          clipSpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
+          densitySpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
           shadowMaps: [this.shadowMap],
           transparent: false,
         });
@@ -283,7 +283,7 @@ export class EDLRenderer{
         
 
         viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtEDL, {
-          clipSpheres: viewer.scene.heatPoints,
+          densitySpheres: viewer.scene.densitySpheres,
           transparent: false,
         });
       }

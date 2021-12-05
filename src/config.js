@@ -33,9 +33,9 @@ export const RENDERING_CONFIG = {
   // Set to true to load GeoJson data.
   fetchGeoJsonData: true,
   // Set to true to render behavioral data as cylinders.
-  renderCylinderPlot: true,
+  renderCylinderPlot: false,
   // Set to true to render behavioral data as density plots.
-  renderDensityPlot: false,
+  renderDensityPlot: true,
   // Set to true to render multivariate density plots (requires CSV data).
-  renderMultivariateDensityPlot: false,
+  renderMultivariateDensityPlot: true,
 };

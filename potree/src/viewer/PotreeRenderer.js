@@ -76,7 +76,7 @@ export class PotreeRenderer {
     }
     
     viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, null, {
-      clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
+      densitySpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
     });
     
     // render scene

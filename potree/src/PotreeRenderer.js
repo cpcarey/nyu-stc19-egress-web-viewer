@@ -1048,9 +1048,9 @@ export class Renderer {
     }
   }
 
-  getDimensionValueCount(clipSpheres) {
+  getDimensionValueCount(densitySpheres) {
     const categoryValueSet = new Set();
-    for (const sphere of clipSpheres) {
+    for (const sphere of densitySpheres) {
       if (sphere.category !== null && sphere.category !== undefined) {
         categoryValueSet.add(sphere.category);
       }
@@ -1112,20 +1112,20 @@ export class Renderer {
 
         let numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
         let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
-        let numClipSpheres = 0;
-        let numClipSpheresSegment1 = 0;
-        let numClipSpheresSegment2 = 0;
+        let numDensitySpheres = 0;
+        let numDensitySpheresSegment1 = 0;
+        let numDensitySpheresSegment2 = 0;
 
-        if (params.clipSpheres) {
-          numClipSpheres = params.clipSpheres.length;
+        if (params.densitySpheres) {
+          numDensitySpheres = params.densitySpheres.length;
 
-          if (this.getDimensionValueCount(params.clipSpheres) === 2) {
-            const clipSpheresSegment1 =
-                params.clipSpheres.filter((sphere) => sphere.category === 0);
-            const clipSpheresSegment2 =
-                params.clipSpheres.filter((sphere) => sphere.category === 1);
-            numClipSpheresSegment1 = clipSpheresSegment1.length;
-            numClipSpheresSegment2 = clipSpheresSegment2.length;
+          if (this.getDimensionValueCount(params.densitySpheres) === 2) {
+            const densitySpheresSegment1 =
+                params.densitySpheres.filter((sphere) => sphere.category === 0);
+            const densitySpheresSegment2 =
+                params.densitySpheres.filter((sphere) => sphere.category === 1);
+            numDensitySpheresSegment1 = densitySpheresSegment1.length;
+            numDensitySpheresSegment2 = densitySpheresSegment2.length;
           }
         }
 
@@ -1135,9 +1135,9 @@ export class Renderer {
           `#define num_shadowmaps ${shadowMaps.length}`,
           `#define num_snapshots ${numSnapshots}`,
           `#define num_clipboxes ${numClipBoxes}`,
-          `#define num_clipspheres ${numClipSpheres}`,
-          `#define num_clipspheres_segment1 ${numClipSpheresSegment1}`,
-          `#define num_clipspheres_segment2 ${numClipSpheresSegment2}`,
+          `#define num_densityspheres ${numDensitySpheres}`,
+          `#define num_densityspheres_segment1 ${numDensitySpheresSegment1}`,
+          `#define num_densityspheres_segment2 ${numDensitySpheresSegment2}`,
           `#define num_clippolygons ${numClipPolygons}`,
         ];
 
@@ -1295,56 +1295,60 @@ export class Renderer {
         gl.uniformMatrix4fv(lClipBoxes, false, material.uniforms.clipBoxes.value);
       }
 
-      // TODO CLIPSPHERES
-      if(params.clipSpheres && params.clipSpheres.length > 0){
+      // Modification by cpcarey: Pass densitySpheres to shader.
+      if (params.densitySpheres && params.densitySpheres.length) {
+        let densitySpheres = params.densitySpheres;
 
-        let clipSpheres = params.clipSpheres;
-
+        // Collect location matrices of density spheres to pass to shader.
         const matrices = [];
         const matricesSegment1 = [];
         const matricesSegment2 = [];
 
-        for(let clipSphere of clipSpheres){
-          //let mScale = new THREE.Matrix4().makeScale(...clipSphere.scale.toArray());
-          //let mTranslate = new THREE.Matrix4().makeTranslation(...clipSphere.position.toArray());
-
-          //let clipToWorld = new THREE.Matrix4().multiplyMatrices(mTranslate, mScale);
-          let clipToWorld = clipSphere.matrixWorld;
+        for (let densitySphere of densitySpheres) {
+          let clipToWorld = densitySphere.matrixWorld;
           let viewToWorld = camera.matrixWorld
           let worldToClip = clipToWorld.clone().invert();
 
-          let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
-
+          let viewToClip =
+              new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
           matrices.push(viewToClip);
 
-          if (clipSphere.category === 0) {
+          // Modification by cpcarey: Maintain two separate matrix arrays for
+          // density spheres separated by category segment.
+          if (densitySphere.category === 0) {
             matricesSegment1.push(viewToClip);
-          } else if (clipSphere.category === 1) {
+          } else if (densitySphere.category === 1) {
             matricesSegment2.push(viewToClip);
           }
         }
 
+        // Modification by cpcarey: Pass densitySpheres to shader in one array.
         let flattenedMatrices =
-            [].concat(...matrices.map(matrix => matrix.elements));
+            [].concat(...matrices.map((matrix) => matrix.elements));
+        const lDensitySpheres = shader.uniformLocations['uDensitySpheres[0]'];
+        gl.uniformMatrix4fv(lDensitySpheres, false, flattenedMatrices);
 
-        const lClipSpheres = shader.uniformLocations['uClipSpheres[0]'];
-        gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
-
-        if (matricesSegment1.length > 0 || matricesSegment2.length > 0) {
+        // Modification by cpcarey: Pass densitySpheres to shader in two
+        // separate arrays based on their category segment.
+        if (matricesSegment1.length || matricesSegment2.length) {
           let flattenedMatricesSegment1 =
-              [].concat(...matricesSegment1.map(matrix => matrix.elements));
+              [].concat(...matricesSegment1.map((matrix) => matrix.elements));
           let flattenedMatricesSegment2 =
-              [].concat(...matricesSegment2.map(matrix => matrix.elements));
+              [].concat(...matricesSegment2.map((matrix) => matrix.elements));
 
-          const lClipSpheresSegment1 = shader.uniformLocations['uClipSpheresSegment1[0]'];
-          gl.uniformMatrix4fv(lClipSpheresSegment1, false, flattenedMatricesSegment1);
+          const lDensitySpheresSegment1 =
+              shader.uniformLocations['uDensitySpheresSegment1[0]'];
+          gl.uniformMatrix4fv(
+              lDensitySpheresSegment1, false, flattenedMatricesSegment1);
 
-          const lClipSpheresSegment2 = shader.uniformLocations['uClipSpheresSegment2[0]'];
-          gl.uniformMatrix4fv(lClipSpheresSegment2, false, flattenedMatricesSegment2);
+          const lDensitySpheresSegment2 =
+              shader.uniformLocations['uDensitySpheresSegment2[0]'];
+          gl.uniformMatrix4fv(
+              lDensitySpheresSegment2, false, flattenedMatricesSegment2);
         }
       }
 
-
+      // Modification by cpcarey: Pass user-defined attributes to shader.
       shader.setUniform1f("uDensityKernelRadius", this.densityKernelRadius);
       shader.setUniform1f("uDensityKernelMax", this.densityKernelMax);
 
