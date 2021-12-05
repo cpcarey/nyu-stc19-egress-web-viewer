@@ -163,7 +163,7 @@ function drawClippingSpheres(
           .sort((a, b) => b[1] - a[1])
           .map((entry) => entry[0])
 
-  controls.updateAttributeClasses(sortedAttributeValues, (attributeClasses) => {
+  controls.updateAttributeClasses(attribute, sortedAttributeValues, (attributeClasses) => {
     resetPotreeViewer();
     updateClippingSpheres(
         viewer, geoJsonData, attribute, attributeValueToSegmentIndexMap,

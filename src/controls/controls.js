@@ -22,7 +22,7 @@ export function handleSelectAttributeClassChange(e, classIndex) {
 }
 
 /** Programmatically creates option elements for the attribute selector. */
-export function setSelectAttributes() {
+export function setSelectAttributes(selectedAttribute) {
   if (RENDERING_CONFIG.renderMultivariateDensityPlot) {
     const multivariateEl = document.querySelector('.controls-multivariate');
     multivariateEl.classList.remove('hide');
@@ -39,12 +39,17 @@ export function setSelectAttributes() {
     const optionEl = document.createElement('option');
     optionEl.value = Attribute[attribute];
     optionEl.innerHTML = attribute;
+
+    if (selectedAttribute === Attribute[attribute]) {
+      optionEl.setAttribute('selected', true);
+    }
+
     selectEl.appendChild(optionEl);
   }
 }
 
-export function updateAttributeClasses(attributeClasses, callback) {
-  setSelectAttributes();
+export function updateAttributeClasses(selectedAttribute, attributeClasses, callback) {
+  setSelectAttributes(selectedAttribute);
 
   const selectEl1 = document.querySelector('.select-attribute-class-1');
   const selectEl2 = document.querySelector('.select-attribute-class-2');
