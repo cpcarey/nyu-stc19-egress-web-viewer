@@ -171,10 +171,6 @@ export class HQSplatRenderer{
 
 				pointcloud.material = depthMaterial;
 			}
-			
-			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtDepth, {
-				densitySpheres: viewer.scene.volumes.filter(v => (v instanceof DensitySphereVolume)),
-			});
 		}
 
 		{ // ATTRIBUTE PASS
@@ -243,7 +239,6 @@ export class HQSplatRenderer{
 
 			viewer.renderer.setRenderTarget(null);
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtAttribute, {
-				densitySpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
 				//material: this.attributeMaterial,
 				blendFunc: [gl.SRC_ALPHA, gl.ONE],
 				//depthTest: false,
