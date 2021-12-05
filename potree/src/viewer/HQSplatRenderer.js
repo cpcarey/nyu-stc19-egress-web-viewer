@@ -173,7 +173,7 @@ export class HQSplatRenderer{
 			}
 			
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtDepth, {
-				clipSpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
+				densitySpheres: viewer.scene.volumes.filter(v => (v instanceof DensitySphereVolume)),
 			});
 		}
 
@@ -243,7 +243,7 @@ export class HQSplatRenderer{
 
 			viewer.renderer.setRenderTarget(null);
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtAttribute, {
-				clipSpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
+				densitySpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
 				//material: this.attributeMaterial,
 				blendFunc: [gl.SRC_ALPHA, gl.ONE],
 				//depthTest: false,

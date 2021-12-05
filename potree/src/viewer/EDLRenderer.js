@@ -2,7 +2,7 @@
 import * as THREE from "../../libs/three.js/build/three.module.js";
 import {PointCloudSM} from "../utils/PointCloudSM.js";
 import {EyeDomeLightingMaterial} from "../materials/EyeDomeLightingMaterial.js";
-import {PointVolume, SphereVolume} from "../utils/Volume.js";
+import {DensitySphereVolume, SphereVolume} from "../utils/Volume.js";
 import {Utils} from "../utils.js";
 
 export class EDLRenderer{
@@ -253,7 +253,7 @@ export class EDLRenderer{
       
       if(lights.length > 0){
         viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtEDL, {
-          densitySpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
+          densitySpheres: viewer.scene.volumes.filter(v => (v instanceof DensitySphereVolume)),
           shadowMaps: [this.shadowMap],
           transparent: false,
         });

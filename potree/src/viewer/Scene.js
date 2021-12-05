@@ -344,7 +344,7 @@ export class Scene extends EventDispatcher{
     }
 
     while (this.densitySpheres.length > 0) {
-      this.removeDensitySphere(this.volumes[0]);
+      this.removeDensitySphere(this.densitySpheres[0]);
     }
 
     while (this.volumes.length > 0) {

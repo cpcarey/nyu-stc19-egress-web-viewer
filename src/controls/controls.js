@@ -29,6 +29,12 @@ export function setSelectAttributes() {
   }
 
   const selectEl = document.querySelector('.selector-attribute');
+
+  // Clear any existing options.
+  while (selectEl.firstChild) {
+    selectEl.removeChild(selectEl.firstChild);
+  }
+
   for (const attribute of Object.keys(Attribute)) {
     const optionEl = document.createElement('option');
     optionEl.value = Attribute[attribute];

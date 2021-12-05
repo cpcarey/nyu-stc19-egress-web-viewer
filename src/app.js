@@ -183,10 +183,11 @@ function updateClippingSpheres(
 
   // Create a Potree clipping sphere for each behavorial point.
   for (const datum of geoJsonData) {
-    // Create a Potree PointVolume object to pass information to the Potree
-    // shader with. PointVolume is a custom type modeled after SphereVolume,
-    // but with unneeded features removed for improved performance.
-    const volume = new Potree.PointVolume();
+    // Create a Potree DensitySphereVolume object to pass information to the
+    // Potree shader with. DensitySphereVolume is a custom type modeled after
+    // SphereVolume, but with unneeded features removed for improved
+    // performance.
+    const volume = new Potree.DensitySphereVolume();
 
     if (attribute !== null && datum.record) {
       // Mark the category of this behavioral point as the segment index

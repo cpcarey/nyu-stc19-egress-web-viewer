@@ -102,14 +102,16 @@ export class Volume extends THREE.Object3D {
   }
 };
 
-export class PointVolume extends THREE.Object3D {
+// Modification by cpcarey: A simple THREE.Object3D that only needs to maintain
+// its location in space.
+export class DensitySphereVolume extends THREE.Object3D {
   constructor(args = {}) {
     super(args);
     this.constructor.counter =
         (this.constructor.counter === undefined)
             ? 0
             : this.constructor.counter + 1;
-    this.name = 'point_' + this.constructor.counter;
+    this.name = 'density_sphere_' + this.constructor.counter;
   }
 
   getVolume() {
