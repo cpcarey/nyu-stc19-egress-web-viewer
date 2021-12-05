@@ -183,10 +183,11 @@ function updateClippingSpheres(
 
   // Create a Potree clipping sphere for each behavorial point.
   for (const datum of geoJsonData) {
-    // Create a Potree PointVolume object to pass information to the Potree
-    // shader with. PointVolume is a custom type modeled after SphereVolume,
-    // but with unneeded features removed for improved performance.
-    const volume = new Potree.PointVolume();
+    // Create a Potree DensitySphereVolume object to pass information to the
+    // Potree shader with. DensitySphereVolume is a custom type modeled after
+    // SphereVolume, but with unneeded features removed for improved
+    // performance.
+    const volume = new Potree.DensitySphereVolume();
 
     if (attribute !== null && datum.record) {
       // Mark the category of this behavioral point as the segment index
@@ -208,10 +209,10 @@ function updateClippingSpheres(
     volume.position.set(center[0], center[1], config.GROUND_Z);
     volume.visible = false;
 
-    // Potree was modified to treat these clipping spheres separately for
+    // Potree was modified to treat these density spheres separately for
     // improved peformance; they do not need extra features that Potree
     // clipping spheres typically have (e.g. boundary rendering).
-    viewer.scene.addHeatPoint(volume);
+    viewer.scene.addDensitySphere(volume);
   }
 
   // Update the legend to reflect the attribute and attribute values observed in
@@ -250,12 +251,12 @@ function drawLegend(attribute, attributeValues) {
 }
 
 /**
- * Resets the Potree viewer by removing all of the Potree.HeatPoint volumes
+ * Resets the Potree viewer by removing all of the Potree.DensitySphere volumes
  * which might have been added previously.
  */
 function resetPotreeViewer() {
-  while (viewer.scene.heatPoints.length) {
-    viewer.scene.removeHeatPoint(viewer.scene.heatPoints[0]);
+  while (viewer.scene.densitySpheres.length) {
+    viewer.scene.removeDensitySphere(viewer.scene.densitySpheres[0]);
   }
 }
 

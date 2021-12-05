@@ -30,7 +30,7 @@ export class Scene extends EventDispatcher{
     this.measurements = [];
     this.profiles = [];
     this.volumes = [];
-    this.heatPoints = [];
+    this.densitySpheres = [];
     this.polygonClipVolumes = [];
     this.cameraAnimations = [];
     this.orientedImages = [];
@@ -131,8 +131,8 @@ export class Scene extends EventDispatcher{
     });
   }
 
-  addHeatPoint(volume) {
-    this.heatPoints.push(volume);
+  addDensitySphere(volume) {
+    this.densitySpheres.push(volume);
     this.dispatchEvent({
       'type': 'volume_added',
       'scene': this,
@@ -221,15 +221,15 @@ export class Scene extends EventDispatcher{
     }
   };
 
-  removeHeatPoint(heatPoint) {
-    let index = this.heatPoints.indexOf(heatPoint);
+  removeDensitySphere(densitySphere) {
+    let index = this.densitySpheres.indexOf(densitySphere);
     if (index > -1) {
-      this.heatPoints.splice(index, 1);
+      this.densitySpheres.splice(index, 1);
 
       this.dispatchEvent({
         'type': 'volume_removed',
         'scene': this,
-        'volume': heatPoint
+        'volume': densitySphere
       });
     }
   };
@@ -343,8 +343,8 @@ export class Scene extends EventDispatcher{
       this.removeProfile(this.profiles[0]);
     }
 
-    while (this.heatPoints.length > 0) {
-      this.removeHeatPoint(this.volumes[0]);
+    while (this.densitySpheres.length > 0) {
+      this.removeDensitySphere(this.densitySpheres[0]);
     }
 
     while (this.volumes.length > 0) {
