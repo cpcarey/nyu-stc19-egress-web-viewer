@@ -112,6 +112,7 @@ export class DensitySphereVolume extends THREE.Object3D {
             ? 0
             : this.constructor.counter + 1;
     this.name = 'density_sphere_' + this.constructor.counter;
+    this.attributeClass = null;
   }
 
   getVolume() {

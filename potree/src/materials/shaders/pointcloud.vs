@@ -57,12 +57,12 @@ uniform int clipMethod;
   uniform mat4 uDensitySpheres[num_densityspheres];
 #endif
 
-#if defined(num_densityspheres_segment1) && num_densityspheres_segment1 > 0
-  uniform mat4 uDensitySpheresSegment1[num_densityspheres_segment1];
+#if defined(num_densityspheres_attr_class_1) && num_densityspheres_attr_class_1 > 0
+  uniform mat4 uDensitySpheresAttrClass1[num_densityspheres_attr_class_1];
 #endif
 
-#if defined(num_densityspheres_segment2) && num_densityspheres_segment2 > 0
-  uniform mat4 uDensitySpheresSegment2[num_densityspheres_segment2];
+#if defined(num_densityspheres_attr_class_2) && num_densityspheres_attr_class_2 > 0
+  uniform mat4 uDensitySpheresAttrClass2[num_densityspheres_attr_class_2];
 #endif
 
 #if defined(num_clippolygons) && num_clippolygons > 0
@@ -946,23 +946,23 @@ void main() {
     float acc1 = 0.0;
     float acc2 = 0.0;
 
-    #if !defined(num_densityspheres_segment1) || num_densityspheres_segment1 == 0
+    #if !defined(num_densityspheres_attr_class_1) || num_densityspheres_attr_class_1 == 0
     for (int i = 0; i < num_densityspheres; i++) {
       float acc_i = getAccumulation(uDensitySpheres[i], mvPosition);
       acc += acc_i;
     }
     #endif
 
-    #if defined(num_densityspheres_segment1) && num_densityspheres_segment1 > 0
-    for (int i = 0; i < num_densityspheres_segment1; i++) {
-      float acc_i = getAccumulation(uDensitySpheresSegment1[i], mvPosition);
+    #if defined(num_densityspheres_attr_class_1) && num_densityspheres_attr_class_1 > 0
+    for (int i = 0; i < num_densityspheres_attr_class_1; i++) {
+      float acc_i = getAccumulation(uDensitySpheresAttrClass1[i], mvPosition);
       acc1 += acc_i;
     }
     #endif
 
-    #if defined(num_densityspheres_segment2) && num_densityspheres_segment2 > 0
-    for (int i = 0; i < num_densityspheres_segment2; i++) {
-      float acc_i = getAccumulation(uDensitySpheresSegment2[i], mvPosition);
+    #if defined(num_densityspheres_attr_class_2) && num_densityspheres_attr_class_2 > 0
+    for (int i = 0; i < num_densityspheres_attr_class_2; i++) {
+      float acc_i = getAccumulation(uDensitySpheresAttrClass2[i], mvPosition);
       acc2 += acc_i;
     }
     #endif
@@ -970,13 +970,13 @@ void main() {
     float acc_max = uDensityKernelMax;
     float intensity = 1.0;
 
-    #if !defined(num_densityspheres_segment1) || num_densityspheres_segment1 == 0
+    #if !defined(num_densityspheres_attr_class_1) || num_densityspheres_attr_class_1 == 0
     if (acc > 0.0) {
       vColor += (ACC_COLOR_MAX_1 - vColor) * (acc / acc_max);
     }
     #endif
 
-    #if defined(num_densityspheres_segment1) && num_densityspheres_segment1 > 0
+    #if defined(num_densityspheres_attr_class_1) && num_densityspheres_attr_class_1 > 0
     if (acc1 > 0.0 || acc2 > 0.0) {
       float acc_mix = min(acc1 + acc2, acc_max) / acc_max;
 
