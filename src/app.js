@@ -36,7 +36,7 @@ function initPotreeViewer() {
  *   records.
  */
 function renderPotreeVisualization(geoJsonData) {
-  Potree.loadPointCloud(config.URL_CLOUD, config.CODE, (e) => {
+  Potree.loadPointCloud(config.POINT_CLOUD_URL, config.CODE, (e) => {
     viewer.scene.addPointCloud(e.pointcloud);
     e.pointcloud.position.z = 0;
 
@@ -84,7 +84,7 @@ function renderPotreeVisualization(geoJsonData) {
 
     // Render density plot.
     if (config.RENDERING_CONFIG.renderDensityPlot) {
-      drawClippingSpheres(viewer, geoJsonData, Attribute.GENDER);
+      drawDensitySpheres(viewer, geoJsonData, Attribute.GENDER);
     }
 
     if (config.RENDERING_CONFIG.renderCylinderPlot) {
@@ -151,9 +151,9 @@ function getAttributeClasses(attribute, geoJsonData) {
  * @param {number=} The radius of the Potree clipping sphere to apply to each
  *     GeoJSON behavioral point for heatmap accumulation.
  */
-function drawClippingSpheres(
+function drawDensitySpheres(
     viewer, geoJsonData, attribute=null,
-    radius=config.CLIPPING_SPHERE_RADIUS) {
+    radius=config.DENSITY_SPHERE_DEFAULT_RADIUS) {
 
   const {attributeValueToSegmentIndexMap, attributeValueCountMap} =
       getAttributeClasses(attribute, geoJsonData);
@@ -165,19 +165,19 @@ function drawClippingSpheres(
 
   controls.updateAttributeClasses(attribute, sortedAttributeValues, (attributeClasses) => {
     resetPotreeViewer();
-    updateClippingSpheres(
+    updateDensitySpheres(
         viewer, geoJsonData, attribute, attributeValueToSegmentIndexMap,
         attributeValueCountMap, attributeClasses, radius);
   });
 
   const topAttributeValues = sortedAttributeValues.slice(0, 2);
 
-  updateClippingSpheres(
+  updateDensitySpheres(
       viewer, geoJsonData, attribute, attributeValueToSegmentIndexMap,
       attributeValueCountMap, topAttributeValues, radius);
 }
 
-function updateClippingSpheres(
+function updateDensitySpheres(
     viewer, geoJsonData, attribute, attributeValueToSegmentIndexMap,
     attributeValueCountMap, selectedAttributeValues, radius) {
 
@@ -190,16 +190,16 @@ function updateClippingSpheres(
     const volume = new Potree.DensitySphereVolume();
 
     if (attribute !== null && datum.record) {
-      // Mark the category of this behavioral point as the segment index
+      // Mark the attribute class of this behavioral point as the segment index
       // corresponding to its attribute value.
       const attributeValue = datum.record[attribute];
 
-      const category = selectedAttributeValues.indexOf(attributeValue);
+      const attributeClass = selectedAttributeValues.indexOf(attributeValue);
       // If this datum is not in the top 2, do not add.
-      if (category === -1) {
+      if (attributeClass === -1) {
         continue;
       }
-      volume.category = category;
+      volume.attributeClass = attributeClass;
     }
 
     const {center} = datum;
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', run);
 window.renderAttribute = async (attribute) => {
   const geoJsonData = await dataStore.getGeoJsonData();
   resetPotreeViewer(geoJsonData);
-  drawClippingSpheres(viewer, geoJsonData, attribute);
+  drawDensitySpheres(viewer, geoJsonData, attribute);
 };
 
 window.renderNoAttribute = () => {

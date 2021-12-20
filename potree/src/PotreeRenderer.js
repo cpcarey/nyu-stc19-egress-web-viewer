@@ -1048,14 +1048,15 @@ export class Renderer {
     }
   }
 
-  getDimensionValueCount(densitySpheres) {
-    const categoryValueSet = new Set();
+  getAttributeClassCount(densitySpheres) {
+    const attributeClassSet = new Set();
     for (const sphere of densitySpheres) {
-      if (sphere.category !== null && sphere.category !== undefined) {
-        categoryValueSet.add(sphere.category);
+      if (sphere.attributeClass !== null &&
+          sphere.attributeClass !== undefined) {
+        attributeClassSet.add(sphere.attributeClass);
       }
     }
-    return categoryValueSet.size;
+    return attributeClassSet.size;
   }
 
   renderOctree(octree, nodes, camera, target, params = {}){
@@ -1113,19 +1114,23 @@ export class Renderer {
         let numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
         let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
         let numDensitySpheres = 0;
-        let numDensitySpheresSegment1 = 0;
-        let numDensitySpheresSegment2 = 0;
+        let numDensitySpheresAttrClass1 = 0;
+        let numDensitySpheresAttrClass2 = 0;
 
         if (params.densitySpheres) {
           numDensitySpheres = params.densitySpheres.length;
 
-          if (this.getDimensionValueCount(params.densitySpheres) === 2) {
-            const densitySpheresSegment1 =
-                params.densitySpheres.filter((sphere) => sphere.category === 0);
-            const densitySpheresSegment2 =
-                params.densitySpheres.filter((sphere) => sphere.category === 1);
-            numDensitySpheresSegment1 = densitySpheresSegment1.length;
-            numDensitySpheresSegment2 = densitySpheresSegment2.length;
+          if (this.getAttributeClassCount(params.densitySpheres) === 2) {
+            const densitySpheresAttrClass1 =
+                params.densitySpheres.filter((sphere) => {
+                  return sphere.attributeClass === 0;
+                });
+            const densitySpheresAttrClass2 =
+                params.densitySpheres.filter((sphere) => {
+                  return sphere.attributeClass === 1;
+                });
+            numDensitySpheresAttrClass1 = densitySpheresAttrClass1.length;
+            numDensitySpheresAttrClass2 = densitySpheresAttrClass2.length;
           }
         }
 
@@ -1136,8 +1141,8 @@ export class Renderer {
           `#define num_snapshots ${numSnapshots}`,
           `#define num_clipboxes ${numClipBoxes}`,
           `#define num_densityspheres ${numDensitySpheres}`,
-          `#define num_densityspheres_segment1 ${numDensitySpheresSegment1}`,
-          `#define num_densityspheres_segment2 ${numDensitySpheresSegment2}`,
+          `#define num_densityspheres_attr_class_1 ${numDensitySpheresAttrClass1}`,
+          `#define num_densityspheres_attr_class_2 ${numDensitySpheresAttrClass2}`,
           `#define num_clippolygons ${numClipPolygons}`,
         ];
 
@@ -1301,8 +1306,8 @@ export class Renderer {
 
         // Collect location matrices of density spheres to pass to shader.
         const matrices = [];
-        const matricesSegment1 = [];
-        const matricesSegment2 = [];
+        const matricesAttrClass1 = [];
+        const matricesAttrClass2 = [];
 
         for (let densitySphere of densitySpheres) {
           let clipToWorld = densitySphere.matrixWorld;
@@ -1314,11 +1319,11 @@ export class Renderer {
           matrices.push(viewToClip);
 
           // Modification by cpcarey: Maintain two separate matrix arrays for
-          // density spheres separated by category segment.
-          if (densitySphere.category === 0) {
-            matricesSegment1.push(viewToClip);
-          } else if (densitySphere.category === 1) {
-            matricesSegment2.push(viewToClip);
+          // density spheres separated by attribute class.
+          if (densitySphere.attributeClass === 0) {
+            matricesAttrClass1.push(viewToClip);
+          } else if (densitySphere.attributeClass === 1) {
+            matricesAttrClass2.push(viewToClip);
           }
         }
 
@@ -1329,22 +1334,22 @@ export class Renderer {
         gl.uniformMatrix4fv(lDensitySpheres, false, flattenedMatrices);
 
         // Modification by cpcarey: Pass densitySpheres to shader in two
-        // separate arrays based on their category segment.
-        if (matricesSegment1.length || matricesSegment2.length) {
-          let flattenedMatricesSegment1 =
-              [].concat(...matricesSegment1.map((matrix) => matrix.elements));
-          let flattenedMatricesSegment2 =
-              [].concat(...matricesSegment2.map((matrix) => matrix.elements));
+        // separate arrays based on their attribute class segment.
+        if (matricesAttrClass1.length || matricesAttrClass2.length) {
+          let flattenedMatricesAttrClass1 =
+              [].concat(...matricesAttrClass1.map((matrix) => matrix.elements));
+          let flattenedMatricesAttrClass2 =
+              [].concat(...matricesAttrClass2.map((matrix) => matrix.elements));
 
-          const lDensitySpheresSegment1 =
-              shader.uniformLocations['uDensitySpheresSegment1[0]'];
+          const lDensitySpheresAttrClass1 =
+              shader.uniformLocations['uDensitySpheresAttrClass1[0]'];
           gl.uniformMatrix4fv(
-              lDensitySpheresSegment1, false, flattenedMatricesSegment1);
+              lDensitySpheresAttrClass1, false, flattenedMatricesAttrClass1);
 
-          const lDensitySpheresSegment2 =
-              shader.uniformLocations['uDensitySpheresSegment2[0]'];
+          const lDensitySpheresAttrClass2 =
+              shader.uniformLocations['uDensitySpheresAttrClass2[0]'];
           gl.uniformMatrix4fv(
-              lDensitySpheresSegment2, false, flattenedMatricesSegment2);
+              lDensitySpheresAttrClass2, false, flattenedMatricesAttrClass2);
         }
       }
 
